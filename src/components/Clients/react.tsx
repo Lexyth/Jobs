@@ -9,7 +9,15 @@ import { useClientsHandler } from "./hook.js";
 
 import { type Client } from "./store.js";
 
-export function Clients() {
+import { twMerge } from "tailwind-merge";
+
+type ClientsProps = {
+    className?: string
+};
+
+export function Clients({
+    className
+}: ClientsProps): JSX.Element {
     const clientsHandler = useClientsHandler();
 
     const [clientToEdit, setClientToEdit] = React.useState<Client | null>(null);
@@ -61,7 +69,12 @@ export function Clients() {
     }))
 
     return (
-        <div className="m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400">
+        <div
+            className={twMerge(
+                "m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400",
+                className
+            )}
+        >
             {clientToEdit
                 && <Modal onClickOutside={closeClientEditor}>
                     <Editor

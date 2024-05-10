@@ -5,6 +5,8 @@ import { Button } from "../Button/react.jsx";
 
 import { useDataEntry, type DataEntryProps, type Value } from "../DataEntry/hook.jsx";
 
+import { twMerge } from "tailwind-merge";
+
 export type ItemData = Record<string, DataEntryProps>;
 export type ItemValues = Record<string, Value>;
 
@@ -14,12 +16,14 @@ type EditorProps = {
     itemData: ItemData,
     onSave: (newItemValues: ItemValues) => void,
     onCancel: () => void,
-    onDelete?: () => void
+    onDelete?: () => void,
+    className?: string
 }
 
 type DeleteModalProps = {
     setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>,
-    onDelete: () => void
+    onDelete: () => void,
+    className?: string
 }
 
 // TODO: redefine editor to take in items, each consisting of the DataEntrys data
@@ -28,7 +32,8 @@ export function Editor({
     itemData,
     onSave,
     onCancel,
-    onDelete
+    onDelete,
+    className
 }: EditorProps): JSX.Element {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
@@ -45,7 +50,12 @@ export function Editor({
     }
 
     return (
-        <div className="w-11/12 h-5/6 m-4 p-4 flex flex-col justify-first items-center overflow-x-hidden overflow-y-auto rounded bg-slate-100 shadow shadow-slate-400">
+        <div
+            className={twMerge(
+                "w-11/12 h-5/6 m-4 p-4 flex flex-col justify-first items-center overflow-x-hidden overflow-y-auto rounded bg-slate-100 shadow shadow-slate-400",
+                className
+            )}
+        >
             <h1>Editor</h1>
 
             {showDeleteModal && onDelete &&
@@ -84,7 +94,8 @@ export function Editor({
 
 function DeleteModal({
     setShowDeleteModal,
-    onDelete
+    onDelete,
+    className
 }: DeleteModalProps): JSX.Element {
 
     const hideModal = React.useCallback(() => {
@@ -94,7 +105,10 @@ function DeleteModal({
     return (
         <Modal onClickOutside={hideModal}>
             <div
-                className="m-4 p-4 flex flex-col justify-between items-center gap-4 rounded bg-slate-100 shadow shadow-slate-400"
+                className={twMerge(
+                    "m-4 p-4 flex flex-col justify-between items-center gap-4 rounded bg-slate-100 shadow shadow-slate-400",
+                    className
+                )}
             >
                 <h1>Are you sure you want to delete this?</h1>
 

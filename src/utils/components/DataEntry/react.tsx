@@ -1,5 +1,7 @@
 import React, { type HTMLInputTypeAttribute } from "react";
 
+import { twMerge } from "tailwind-merge";
+
 export type Value = string | number;
 
 export type DataEntryProps = {
@@ -10,7 +12,8 @@ export type DataEntryProps = {
         description?: string,
         value: Value,
         current?: boolean
-    }[]
+    }[],
+    className?: string
 };
 
 type ValueState = {
@@ -24,7 +27,8 @@ export function DataEntry({
     inputType = "text",
     defaultDatas = [],
     value,
-    setValue
+    setValue,
+    className
 }: DataEntryProps & ValueState) {
     const id = React.useId();
 
@@ -95,7 +99,12 @@ export function DataEntry({
     }
 
     return (
-        <div className="min-w-[40%] m-4 px-4 py-2 flex flex-row justify-between items-center gap-4 flex-1 overflow-hidden rounded bg-slate-200 shadow shadow-slate-400">
+        <div
+            className={twMerge(
+                "min-w-[40%] m-4 px-4 py-2 flex flex-row justify-between items-center gap-4 flex-1 overflow-hidden rounded bg-slate-200 shadow shadow-slate-400",
+                className
+            )}
+        >
             <p>{title}</p>
             {element}
         </div >

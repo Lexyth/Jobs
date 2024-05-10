@@ -7,7 +7,15 @@ import { useJobsHandler } from "../Jobs/hook.js";
 
 import { JobStatus } from "../Jobs/store.js";
 
-export function Invoice() {
+import { twMerge } from "tailwind-merge";
+
+type InvoiceProps = {
+    className?: string
+};
+
+export function Invoice({
+    className
+}: InvoiceProps): JSX.Element {
     const clientsHandler = useClientsHandler();
     const jobsHandler = useJobsHandler();
 
@@ -43,7 +51,12 @@ export function Invoice() {
     });
 
     return (
-        <div className="m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400">
+        <div
+            className={twMerge(
+                "m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400",
+                className
+            )}
+        >
             <h2 className="text-xl font-semibold">Clients</h2>
 
             <List

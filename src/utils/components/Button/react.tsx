@@ -9,7 +9,7 @@ type ButtonProps = {
 export function Button({
     title,
     onClick,
-    className = ""
+    className
 }: ButtonProps): JSX.Element {
     return (
         <button

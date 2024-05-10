@@ -10,6 +10,12 @@ import { useJobsHandler } from "./hook.js";
 
 import { type Job, JobStatus } from "./store.js";
 
+import { twMerge } from "tailwind-merge";
+
+type JobsProps = {
+    className?: string
+};
+
 // TODO: addNewJobButton should directly open editor
 
 // TODO: do this only once the database has been set up so sql can handle that
@@ -18,7 +24,9 @@ import { type Job, JobStatus } from "./store.js";
 // TODO: add sort by date or price, ascending and descending
 // TODO: add find between date
 
-export function Jobs() {
+export function Jobs({
+    className
+}: JobsProps): JSX.Element {
     const clientsHandler = useClientsHandler();
     const jobsHandler = useJobsHandler();
 
@@ -101,7 +109,12 @@ export function Jobs() {
     });
 
     return (
-        <div className="m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400">
+        <div
+            className={twMerge(
+                "m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400",
+                className
+            )}
+        >
             {jobToEdit
                 && <Modal onClickOutside={closeJobEditor}>
                     <Editor

@@ -24,7 +24,8 @@ type ListProps = {
     onClickItem?: (itemId: number) => boolean | void,
     selectedItems?: { [key: number]: boolean },
     setSelectedItems?: (newSelectedItems: { [key: number]: boolean }) => void,
-    singleSelection?: boolean
+    singleSelection?: boolean,
+    className?: string
 }
 
 export function List({
@@ -32,7 +33,8 @@ export function List({
     onClickItem,
     selectedItems: selectedItems,
     setSelectedItems: setSelectedItems,
-    singleSelection = false
+    singleSelection = false,
+    className
 }: ListProps) {
     const handleSelect = React.useCallback(function (itemId: number) {
         if (setSelectedItems === undefined)
@@ -65,7 +67,12 @@ export function List({
     }, [onClickItem, setSelectedItems, handleSelect]);
 
     return (
-        <div className="w-11/12 m-2 p-2 flex flex-col gap-4 rounded bg-slate-200 shadow shadow-slate-500 transition duration-300">
+        <div
+            className={twMerge(
+                "w-11/12 m-2 p-2 flex flex-col gap-4 rounded bg-slate-200 shadow shadow-slate-500 transition duration-300",
+                className
+            )}
+        >
             {items.map((item) =>
                 <Item
                     key={item.id}
@@ -81,20 +88,29 @@ export function List({
 type ItemProps = {
     item: Item,
     onClick?: () => void,
-    selected?: boolean
+    selected?: boolean,
+    className?: string
 };
 
 function Item({
     item,
     onClick,
-    selected
+    selected,
+    className
 }: ItemProps) {
 
     const children = Object.entries(item.summary).map(([key, value]) => {
         const className = typeof value === "object" ? value.className : "";
         const content = typeof value === "object" ? value.value : value;
-        const child = <p className={twMerge("flex-1", className)
-        } key={key} > {content}</p >;
+        const child = (
+            <p
+                className={twMerge(
+                    "flex-1",
+                    className
+                )}
+                key={key}
+            >{content}</p>
+        );
         return child;
     });
 
@@ -103,12 +119,14 @@ function Item({
             className={twMerge(
                 "m-2 p-2 flex flex-row space-between items-center gap-4 rounded bg-slate-100 shadow shadow-slate-600 transition duration-300 hover:bg-slate-300 active:bg-slate-200",
                 selected && "bg-slate-300 hover:bg-slate-200 active:bg-slate-100",
-                onClick && "cursor-pointer"
+                onClick && "cursor-pointer",
+                className
             )}
-            onClick={onClick} >
+            onClick={onClick}
+        >
             {
                 children
             }
-        </div >
+        </div>
     );
 }
