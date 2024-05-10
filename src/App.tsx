@@ -6,23 +6,22 @@ import { Invoice } from "./components/Invoice/react";
 
 import { Button } from "./utils/components/Button/react";
 
-  const clientsView = {
-    title: "Client",
+const clientsView = {
+  title: "Client",
   element: <Clients className="w-11/12" />
-  };
+};
 
-  const jobsView = {
-    title: "Jobs",
+const jobsView = {
+  title: "Jobs",
   element: <Jobs className="w-11/12" />
-  };
+};
 
-  const invoiceView = {
-    title: "Invoice",
+const invoiceView = {
+  title: "Invoice",
   element: <Invoice className="w-11/12" />
-  };
+};
 
 export default function App() {
-
   const [view, setView] = React.useState(jobsView);
 
   return (
@@ -41,7 +40,6 @@ export default function App() {
       <h1 className="text-3xl font-bold underline">{view.title}</h1>
 
       {view ? view.element : <div>Nothing to see here</div>}
-
     </div>
   );
 }
