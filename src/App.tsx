@@ -25,9 +25,9 @@ export default function App() {
   const [view, setView] = React.useState(jobsView);
 
   return (
-    <div className="min-w-[1000px] text-center text-slate-700 select-none">
+    <div className="min-w-[1000px] min-h-screen p-4 flex flex-col justify-start items-center gap-4 bg-slate-500 text-center text-slate-700 select-none">
 
-      <div className="m-4 p-4 flex flex-row justify-evenly gap-4 rounded bg-slate-400 shadow shadow-slate-600">
+      <div className="w-5/6 p-4 flex flex-row justify-evenly gap-4 rounded bg-slate-400 shadow shadow-slate-600">
 
         <Button className="font-bold" title="Clients" onClick={() => setView(clientsView)} />
 
@@ -37,7 +37,7 @@ export default function App() {
 
       </div>
 
-      <h1 className="text-3xl font-bold underline">{view.title}</h1>
+      <h1 className="w-min p-4 rounded bg-slate-400 text-3xl font-bold underline">{view.title}</h1>
 
       {view ? view.element : <div>Nothing to see here</div>}
     </div>
