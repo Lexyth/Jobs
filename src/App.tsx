@@ -6,21 +6,22 @@ import { Invoice } from "./components/Invoice/react";
 
 import { Button } from "./utils/components/Button/react";
 
-export default function App() {
   const clientsView = {
     title: "Client",
-    element: <Clients />
+  element: <Clients className="w-11/12" />
   };
 
   const jobsView = {
     title: "Jobs",
-    element: <Jobs />
+  element: <Jobs className="w-11/12" />
   };
 
   const invoiceView = {
     title: "Invoice",
-    element: <Invoice />
+  element: <Invoice className="w-11/12" />
   };
+
+export default function App() {
 
   const [view, setView] = React.useState(jobsView);
 
