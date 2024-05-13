@@ -180,19 +180,20 @@ function download(path: string, type: string | undefined = "text/plain"): Promis
     );
 }
 
-function upload(file: File): Promise<boolean> {
+function upload(file: File, mode: Dropbox.files.WriteMode = { ".tag": "overwrite" }): Promise<boolean> {
     const statusPromise = dropbox.filesUpload({
         path: "/" + file.name,
-        contents: file
+        contents: file,
+        mode
     });
 
     return statusPromise.then(
         function (response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>) {
-            console.log(response);
+            console.log("Uploaded to Dropbox:", response);
             return true;
         },
         function (error: Dropbox.DropboxResponseError<Dropbox.files.UploadError>) {
-            console.log(error);
+            console.warn(error);
             return false;
         }
     )
