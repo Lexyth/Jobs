@@ -161,20 +161,20 @@ let dropbox: Dropbox.Dropbox;
     await auth();
 };
 
-function download(path: string): Promise<File | undefined> {
+function download(path: string, type: string | undefined = "text/plain"): Promise<File | undefined> {
     const filePromise = dropbox.filesDownload({
         path: "/" + path
     });
 
     return filePromise.then(
         function (response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>): File {
-            console.log(response);
+            console.log("Downloaded from Dropbox:", response);
             const fileMetadata = response.result;
-            const file: File = new File([(<any>fileMetadata).fileBinary], fileMetadata.name, { type: "text/csv" });
+            const file: File = new File([(<any>fileMetadata).fileBlob], fileMetadata.name, { type });
             return file;
         },
         function (error: Dropbox.DropboxResponseError<Dropbox.files.DownloadError>): undefined {
-            console.log(error);
+            console.warn(error);
             return undefined;
         }
     );
