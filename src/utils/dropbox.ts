@@ -94,6 +94,7 @@ let dropbox: Dropbox.Dropbox;
             })
             .catch((error) => {
                 console.error(error.error || error);
+                throw error;
             });
         return promise;
     }
@@ -127,7 +128,7 @@ let dropbox: Dropbox.Dropbox;
     function auth() {
         console.log("Authenticating for Dropbox API");
 
-        var REDIRECT_URI = window.location.href;
+        var REDIRECT_URI = window.location.href.split("?")[0];
         var CLIENT_ID = '43pkecavqfklasz';
 
         var dbxAuth = new Dropbox.DropboxAuth({
