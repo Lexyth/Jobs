@@ -40,6 +40,8 @@ let dropbox: Dropbox.Dropbox;
         return ret;
     }
 
+    // TODO: remove these old code things, since we're not storing the auth code; we're using the refresh-token
+
     function getOldCode() {
         return window.localStorage.getItem('code');
     }
@@ -118,12 +120,12 @@ let dropbox: Dropbox.Dropbox;
         dropbox = new Dropbox.Dropbox({
             auth: dbxAuth
         });
-        console.log("Success");
+        console.log("Successfully Authenticated for Dropbox API");
     }
 
     // TODO: somewhere here there might be flaws; but it's good enough for now
     function auth() {
-        console.log("Authenticating");
+        console.log("Authenticating for Dropbox API");
 
         var REDIRECT_URI = 'http://localhost:3000/Jobs/';
         var CLIENT_ID = '43pkecavqfklasz';
