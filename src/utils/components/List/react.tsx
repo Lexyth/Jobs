@@ -2,37 +2,42 @@ import React from "react";
 
 import { twMerge } from "tailwind-merge";
 
-// TODO: consider changing items from an object to an array
+// TODO: consider changing selectedItems from an object to an array
 
 // TODO: support selectedItems being an object, array, and single item
 
 // TODO: extract a SelectionList component from List
 
+type Value = string | number;
+
+type StyledValue = { value: Value, className: string };
+
 export type Item = {
     id: number,
-    summary: {
-        [key: string]: string | number | {
-            value: string | number,
-            className: string
-        }
-    }
+    summary: Record<string, Value | StyledValue>
 }
 
+type SelectedItems = Record<number, boolean>;
+
+type SelectionProps = {
+    selectedItems: SelectedItems,
+    setSelectedItems?: (newSelectedItems: SelectedItems) => void,
+    singleSelection?: boolean
+};
+
+// TODO: switch onClickItem return value so selection changes (and is calculated) only when we return true
 type ListProps = {
     items: Item[],
     /** return false if item selection should not change as result of click*/
     onClickItem?: (itemId: number) => boolean | void,
-    selectedItems?: { [key: number]: boolean },
-    setSelectedItems?: (newSelectedItems: { [key: number]: boolean }) => void,
-    singleSelection?: boolean,
     className?: string
-}
+} & Partial<SelectionProps>;
 
 export function List({
     items,
     onClickItem,
-    selectedItems: selectedItems,
-    setSelectedItems: setSelectedItems,
+    selectedItems,
+    setSelectedItems,
     singleSelection = false,
     className
 }: ListProps) {
