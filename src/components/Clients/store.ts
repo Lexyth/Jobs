@@ -1,25 +1,30 @@
-import { createStore } from "../../utils/store";
+import { createPersistentCSVStore } from "../../utils/store";
 
 export type Client = {
     id: number;
     name: string;
 }
 
-export const clientsStore = createStore<Client[]>([
+const defaultClients: Client[] = [
     {
         id: 0,
-        name: 'Bob',
-    },
-    {
-        id: 1,
-        name: 'Sally',
-    },
-    {
-        id: 2,
-        name: 'Joe',
-    },
-    {
-        id: 3,
-        name: 'Jane',
+        name: "Client"
     }
-]);
+];
+
+export const clientsStore = createPersistentCSVStore<Client>(
+    defaultClients,
+    "clients.csv",
+    (client) => {
+        return [
+            client.id.toString(),
+            client.name
+        ];
+    },
+    (arr: string[]): Client => {
+        return {
+            id: parseInt(arr[0]),
+            name: arr[1]
+        };
+    }
+);
