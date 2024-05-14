@@ -127,7 +127,7 @@ let dropbox: Dropbox.Dropbox;
     function auth() {
         console.log("Authenticating for Dropbox API");
 
-        var REDIRECT_URI = 'http://localhost:3000/Jobs/';
+        var REDIRECT_URI = window.location.href;
         var CLIENT_ID = '43pkecavqfklasz';
 
         var dbxAuth = new Dropbox.DropboxAuth({
