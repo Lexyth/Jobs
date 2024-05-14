@@ -1,4 +1,6 @@
-import { createStore } from "../../utils/store.js";
+import { createPersistentCSVStore } from "../../utils/store.js";
+
+import { enumMemberFromString } from "../../utils/utils.js";
 
 export enum JobStatus {
     InProgress = "In Progress",
@@ -19,49 +21,48 @@ export type Job = {
     status: JobStatus
 }
 
-export const jobsStore = createStore<Job[]>([
+const defaultJobs: Job[] = [
     {
         id: 0,
         clientId: 0,
-        date: '2022-01-01',
-        description: 'Description 1',
-        price: 100,
+        date: '1970-01-01',
+        description: 'Description',
+        price: 0,
         count: 1,
-        total: 100,
+        total: 0,
         vat: 0,
         status: JobStatus.InProgress,
-    },
-    {
-        id: 1,
-        clientId: 1,
-        date: '2022-01-02',
-        description: 'Description 2 fdsfd',
-        price: 200,
-        count: 2,
-        total: 400,
-        vat: 0.7,
-        status: JobStatus.InvoicePending,
-    },
-    {
-        id: 2,
-        clientId: 2,
-        date: '2022-01-03',
-        description: 'Description 3 fdsfdf fdsfdsfs fdsfsd',
-        price: 300,
-        count: 3,
-        total: 900,
-        vat: 0.17,
-        status: JobStatus.AwaitingPayment,
-    },
-    {
-        id: 3,
-        clientId: 3,
-        date: '2022-01-04',
-        description: 'Description 4 fdsfsdfsdf fsdfsdfsf fdsfsdfsdf dfssdfsfs fsdfdsfsd',
-        price: 400,
-        count: 4,
-        total: 1600,
-        vat: 0.19,
-        status: JobStatus.Closed,
     }
-]);
+];
+
+export const jobsStore = createPersistentCSVStore<Job>(
+    defaultJobs,
+    "jobs.csv",
+    (job) => {
+        return [
+            job.id.toString(),
+            job.clientId.toString(),
+            job.date,
+            job.description,
+            job.price.toString(),
+            job.count.toString(),
+            job.total.toString(),
+            job.vat.toString(),
+            job.status.toString(),
+        ];
+    },
+    (arr: string[]): Job => {
+        const status = enumMemberFromString(arr[8], JobStatus);
+        return {
+            id: parseInt(arr[0]),
+            clientId: parseInt(arr[1]),
+            date: arr[2],
+            description: arr[3],
+            price: parseFloat(arr[4]),
+            count: parseFloat(arr[5]),
+            total: parseFloat(arr[6]),
+            vat: parseFloat(arr[7]),
+            status
+        };
+    }
+);
