@@ -1,6 +1,7 @@
 import React from "react";
 
 import { List, type Item as ListItem } from "../../utils/components/List/react";
+import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "../Jobs/hook";
@@ -29,6 +30,10 @@ export function Invoice({
 
     const [selectedClient, setSelectedClient] = React.useState<Record<string, boolean>>({});
     const [selectedJobs, setSelectedJobs] = React.useState<Record<string, boolean>>({});
+
+    if (!clientsHandler.loaded || !jobsHandler.loaded) {
+        return <LoadingSpinner />
+    }
 
     const selectedClientsLength = Object.keys(selectedClient).length;
     const filteredJobs = jobsHandler.getJobs().filter((job) => job.status === JobStatus.InvoicePending && (selectedClientsLength === 0 || selectedClient[job.clientId] === true));
