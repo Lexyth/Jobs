@@ -1,19 +1,36 @@
 import React from "react";
 
-import { Modal } from "../../utils/components/Modal/react.jsx";
-import { List, type Item as ListItem } from "../../utils/components/List/react.jsx";
-import { Editor, type ItemValues } from "../../utils/components/Editor/react.jsx";
-import { Button } from "../../utils/components/Button/react.jsx";
+import { Modal } from "../../utils/components/Modal/react";
+import { List, type Item as ListItem } from "../../utils/components/List/react";
+import { Editor, type ItemValues as EditorItemValues, type ItemData as EditorItemData } from "../../utils/components/Editor/react";
+import { Button } from "../../utils/components/Button/react";
+import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
-import { useClientsHandler } from "./hook.js";
+import { useClientsHandler } from "./hook";
 
-import { type Client } from "./store.js";
+import { makeListItemsFromClients } from "./script";
+
+import { type Client } from "./store";
 
 import { twMerge } from "tailwind-merge";
 
 type ClientsProps = {
     className?: string
 };
+
+type ClientEditorProps = {
+    client: Client,
+    onCancel: () => void,
+}
+
+type ClientListProps = {
+    clients: Client[],
+    onClickItem: (clientId: number) => void,
+}
+
+type AddNewClientButtonProps = {
+    openClientEditor: (client: Client) => void
+}
 
 export function Clients({
     className
@@ -22,51 +39,26 @@ export function Clients({
 
     const [clientToEdit, setClientToEdit] = React.useState<Client | null>(null);
 
-    function openClientEditor(client: Client) {
+    const openClientEditor = React.useCallback(function (client: Client) {
         setClientToEdit(client);
-    }
+    }, []);
 
-    function closeClientEditor() {
+    const closeClientEditor = React.useCallback(function () {
         setClientToEdit(null);
-    }
+    }, []);
 
-    function handleEditClient(newClientData: ItemValues) {
-        closeClientEditor();
-
-        if (clientToEdit === null)
-            throw new Error("No client to edit");
-
-        const newClient: Client = {
-            ...clientToEdit,
-            ...newClientData
+    const handleClickClient = React.useCallback(function (clientId: number) {
+        const client = clientsHandler.getClient(clientId);
+        if (client !== undefined) {
+            openClientEditor(client);
         }
-        clientsHandler.setClient(newClient);
-    }
+    }, [clientsHandler, openClientEditor]);
 
-    function handleDeleteClient() {
-        closeClientEditor();
-
-        if (clientToEdit)
-            clientsHandler.removeClient(clientToEdit);
-    }
-
-    function handleAddNewClient() {
-        const id = clientsHandler.getClients().reduce((id, client) => client.id > id ? client.id : id, 0) + 1;
-        const newClient = {
-            id: 0, // auto set when added via clientsHandler.addClient
-            name: "Client " + id
-        };
-        if (clientsHandler.addClient(newClient) === -1)
-            console.warn("Could not add client: ", newClient);
+    if (!clientsHandler.loaded) {
+        return <LoadingSpinner />
     }
 
     const clients = clientsHandler.getClients();
-    const items: ListItem[] = clients.map((client) => ({
-        id: client.id,
-        summary: {
-            "name": client.name
-        }
-    }))
 
     return (
         <div
@@ -75,39 +67,88 @@ export function Clients({
                 className
             )}
         >
-            {clientToEdit
-                && <Modal onClickOutside={closeClientEditor}>
-                    <Editor
-                        itemData={{
-                            name: {
-                                title: "Name",
-                                defaultDatas: [
-                                    { current: true, value: clientToEdit.name }
-                                ]
-                            }
-                        }}
-                        onSave={handleEditClient}
-                        onCancel={closeClientEditor}
-                        onDelete={handleDeleteClient}
-                    />
-                </Modal>
-            }
+            {clientToEdit && <ClientEditor client={clientToEdit} onCancel={closeClientEditor} />}
 
-            <List
-                items={items}
-                onClickItem={(clientId: number) => {
-                    const client = clients.find((client) => client.id === clientId);
-                    if (client !== undefined) {
-                        openClientEditor(client);
-                    }
-                }}
-            />
+            <ClientList clients={clients} onClickItem={handleClickClient} />
 
-            <Button
-                title="Add New Client"
-                onClick={handleAddNewClient}
-            />
+            <AddNewClientButton openClientEditor={openClientEditor} />
 
         </div>
     );
+}
+
+function ClientEditor({
+    client,
+    onCancel,
+}: ClientEditorProps): JSX.Element {
+
+    const clientsHandler = useClientsHandler();
+
+    const handleEditClient = React.useCallback(function (newClientData: EditorItemValues) {
+        onCancel();
+
+        if (client === null)
+            throw new Error("No client to edit");
+
+        const newClient: Client = {
+            ...client,
+            ...newClientData
+        }
+
+        clientsHandler.setClient(newClient);
+    }, [client, clientsHandler]);
+
+    const handleDeleteClient = React.useCallback(function () {
+        onCancel();
+
+        if (client)
+            clientsHandler.removeClient(client);
+    }, [client, clientsHandler]);
+
+    const itemData: EditorItemData = {
+        name: {
+            title: "Name",
+            defaultDatas: [
+                { current: true, value: client.name }
+            ]
+        }
+    };
+    return (
+        <Modal onClickOutside={onCancel}>
+            <Editor
+                itemData={itemData}
+                onSave={handleEditClient}
+                onCancel={onCancel}
+                onDelete={handleDeleteClient}
+            />
+        </Modal>
+    );
+}
+
+function ClientList({
+    clients,
+    onClickItem
+}: ClientListProps): JSX.Element {
+    const items: ListItem[] = makeListItemsFromClients(clients);
+
+    return <List items={items} onClickItem={onClickItem} />;
+}
+
+function AddNewClientButton({
+    openClientEditor
+}: AddNewClientButtonProps): JSX.Element {
+    const clientsHandler = useClientsHandler();
+
+    const handleAddNewClient = React.useCallback(function () {
+        const newClient = {
+            id: 0, // auto set when added via clientsHandler.addClient
+            name: "Unknown Client"
+        };
+
+        clientsHandler.addClient(newClient);
+
+        openClientEditor(newClient);
+    }, [clientsHandler])
+
+    return <Button title="Add New Client" onClick={handleAddNewClient} />;
 }
