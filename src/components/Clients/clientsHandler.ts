@@ -17,14 +17,14 @@ export class ClientsHandler {
         return clientsStore.loaded;
     }
 
-    addClient(client: Client): number {
+    add(client: Client): number {
         client.id = clientsStore.get().reduce((id, client) => client.id > id ? client.id : id, 0) + 1;
         const newClients = [...clientsStore.get(), { ...client }];
         clientsStore.set(newClients);
         return client.id;
     };
 
-    removeClient(client: Client | number): boolean {
+    remove(client: Client | number): boolean {
         let newClients;
         if (client instanceof Object) {
             newClients = clientsStore.get().filter((oldClient) => oldClient.id !== client.id);
@@ -35,7 +35,7 @@ export class ClientsHandler {
         return newClients.length !== clientsStore.get().length;
     }
 
-    setClient(client: Client): boolean {
+    set(client: Client): boolean {
         const index = clientsStore.get().findIndex((oldClient) => oldClient.id === client.id);
 
         if (index === -1) {
@@ -50,7 +50,7 @@ export class ClientsHandler {
         }
     }
 
-    getClient(identifier: string | number): Client | void {
+    get(identifier: string | number): Client | void {
         let client: Client | undefined;
         if (typeof identifier === "string") {
             client = clientsStore.get().find((client) => client.name === identifier);
@@ -63,7 +63,7 @@ export class ClientsHandler {
         return { ...client };
     }
 
-    getClients(): Client[] {
+    getAll(): Client[] {
         return [...clientsStore.get()];
     }
 }
