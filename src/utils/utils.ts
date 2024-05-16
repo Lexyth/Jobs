@@ -4,6 +4,10 @@ export function enumMemberFromString(string: string, _enum: any) {
     if (index === -1) {
         throw new Error("Invalid enum value: " + string);
     }
-    let e = _enum[entries[index][0] as keyof typeof _enum];
+    const entry = entries[index];
+    if (entry === undefined) {
+        throw new Error("Invalid enum value: " + string);
+    }
+    let e = _enum[entry[0] as keyof typeof _enum];
     return e;
 }

@@ -116,18 +116,23 @@ export function createPersistentCSVStore<Type>(
     saveDelay?: number
 ): PersistentStore<Type[]> {
     const loadCSV = async () => {
-        const text = await load(path);
-        if (!text) {
+        const csvText = await load(path);
+        if (!csvText) {
             console.warn("Loading CSV failed. No text in file.");
             return initialValue;
         }
 
-        const dataArray = text.split("\n");
+        const csvArray = csvText.split("\n");
 
         let result: Type[] = [];
 
-        for (let i = 0; i < dataArray.length; i++) {
-            const data = dataArray[i].split(",");
+        for (let i = 0; i < csvArray.length; i++) {
+            const csv = csvArray[i];
+            if (csv === undefined) {
+                continue;
+            }
+
+            const data = csv.split(",");
 
             const obj = fromArray(data);
             result.push(obj);

@@ -26,8 +26,6 @@ type DeleteModalProps = {
     className?: string
 }
 
-// TODO: redefine editor to take in items, each consisting of the DataEntrys data
-
 export function Editor({
     itemData,
     onSave,
