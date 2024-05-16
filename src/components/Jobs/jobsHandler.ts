@@ -17,14 +17,14 @@ export class JobsHandler {
         return jobsStore.loaded;
     }
 
-    addJob(job: Job): number {
+    add(job: Job): number {
         job.id = jobsStore.get().reduce((id, job) => job.id > id ? job.id : id, 0) + 1;
         const newJobs = [...jobsStore.get(), { ...job }];
         jobsStore.set(newJobs);
         return job.id;
     }
 
-    removeJob(job: Job | number): boolean {
+    remove(job: Job | number): boolean {
         let newJobs;
         if (job instanceof Object) {
             newJobs = jobsStore.get().filter((oldJob) => oldJob.id !== job.id);
@@ -35,7 +35,7 @@ export class JobsHandler {
         return newJobs.length !== jobsStore.get().length;
     }
 
-    setJob(job: Job): boolean {
+    set(job: Job): boolean {
         const index = jobsStore.get().findIndex((oldJob) => oldJob.id === job.id);
 
         if (index === -1) {
@@ -50,7 +50,7 @@ export class JobsHandler {
         }
     }
 
-    getJob(id: number): Job | void {
+    get(id: number): Job | void {
         let job = jobsStore.get().find((job) => job.id === id);
 
         if (job === undefined)
@@ -58,7 +58,7 @@ export class JobsHandler {
         return { ...job };
     }
 
-    getJobs(): Job[] {
+    getAll(): Job[] {
         return [...jobsStore.get()];
     }
 }
