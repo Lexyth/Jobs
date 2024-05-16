@@ -2,33 +2,33 @@ import React from "react";
 
 import { twMerge } from "tailwind-merge";
 
-// TODO: consider changing selectedItems from an object to an array
+// TODO?: extract a SelectionList component from List
 
-// TODO: support selectedItems being an object, array, and single item
+export type Value = string | number;
 
-// TODO: extract a SelectionList component from List
+export type StyledValue = { value: Value, className: string };
 
-type Value = string | number;
-
-type StyledValue = { value: Value, className: string };
+// TODO: convert Item to Record<string, Value | StyledValue>
 
 export type Item = {
     id: number,
     summary: Record<string, Value | StyledValue>
 }
 
-type SelectedItems = Record<number, boolean>;
+export type SingleSelection = number | null;
+export type MultiSelection = Array<number>;
+
+export type Selection = SingleSelection | MultiSelection;
 
 type SelectionProps = {
-    selectedItems: SelectedItems,
-    setSelectedItems?: (newSelectedItems: SelectedItems) => void,
+    selection: Selection,
+    setSelection?: (newSelectedItems: Selection) => void,
     singleSelection?: boolean
 };
 
-// TODO: switch onClickItem return value so selection changes (and is calculated) only when we return true
 type ListProps = {
     items: Item[],
-    /** return false if item selection should not change as result of click*/
+    /** return true if item selection should change as result of click*/
     onClickItem?: (itemId: number) => boolean | void,
     className?: string
 } & Partial<SelectionProps>;
@@ -36,40 +36,44 @@ type ListProps = {
 export function List({
     items,
     onClickItem,
-    selectedItems,
-    setSelectedItems,
-    singleSelection = false,
+    selection,
+    setSelection,
     className
 }: ListProps) {
-    const handleSelect = React.useCallback(function (itemId: number) {
-        if (setSelectedItems === undefined)
+
+    const singleSelection = !Array.isArray(selection);
+
+    const handleSelect = React.useCallback(function (indexInItems: number) {
+        if (setSelection === undefined)
             return;
 
         if (singleSelection) {
-            if (selectedItems?.[itemId] === true)
-                setSelectedItems({});
-            else
-                setSelectedItems({ [itemId]: true });
-            return;
+            if (selection === indexInItems) {
+                setSelection(null);
+            } else {
+                setSelection(indexInItems);
+            } return;
         }
 
-        const newSelected = { ...selectedItems };
-        if (newSelected[itemId] === true) {
-            delete newSelected[itemId];
+        const newSelection = [...selection];
+        const indexInSelection = newSelection.findIndex(value => value === indexInItems);
+        if (indexInSelection !== -1) {
+            console.log("removing", indexInSelection);
+            newSelection.splice(indexInSelection, 1);
         } else {
-            newSelected[itemId] = true;
+            console.log("adding", indexInItems);
+            newSelection.push(indexInItems);
         }
-        setSelectedItems(newSelected);
-    }, [singleSelection, selectedItems, setSelectedItems]);
+        setSelection(newSelection);
+    }, [singleSelection, selection, setSelection]);
 
-    const handleClickItem = React.useCallback(function (itemId: number) {
-        if (onClickItem?.(itemId) === false)
-            return;
-
-        if (setSelectedItems) {
-            handleSelect(itemId);
+    const handleClickItem = React.useCallback(function (indexInItems: number) {
+        if (onClickItem?.(indexInItems) === true) {
+            if (setSelection) {
+                handleSelect(indexInItems);
+            }
         }
-    }, [onClickItem, setSelectedItems, handleSelect]);
+    }, [onClickItem, setSelection, handleSelect]);
 
     return (
         <div
@@ -78,12 +82,16 @@ export function List({
                 className
             )}
         >
-            {items.map((item) =>
+            {items.map((item, index) =>
                 <Item
                     key={item.id}
                     item={item}
-                    onClick={() => handleClickItem(item.id)}
-                    selected={selectedItems?.[item.id] ? true : false}
+                    onClick={() => handleClickItem(index)}
+                    selected={(
+                        singleSelection
+                            ? selection === index
+                            : selection.includes(index)
+                    ) ? true : false}
                 />
             )}
         </div>
