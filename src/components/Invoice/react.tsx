@@ -1,6 +1,6 @@
 import React from "react";
 
-import { List, type Item as ListItem } from "../../utils/components/List/react";
+import { List, type Item as ListItem, type SingleSelection as ListSingleSelection, type MultiSelection as ListMultiSelection } from "../../utils/components/List/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "../Clients/hook";
@@ -16,7 +16,7 @@ import { twMerge } from "tailwind-merge";
 
 // TODO: select all jobs button
 
-// TODO: create an invoice entry, from which one can generate the pdf or click on it to overwrite all parameters (showing the original next to it)
+// TODO!: create an invoice entry, from which one can generate the pdf or click on it to overwrite all parameters (showing the original next to it)
 
 type InvoiceProps = {
     className?: string
@@ -28,17 +28,21 @@ export function Invoice({
     const clientsHandler = useClientsHandler();
     const jobsHandler = useJobsHandler();
 
-    const [selectedClient, setSelectedClient] = React.useState<Record<string, boolean>>({});
-    const [selectedJobs, setSelectedJobs] = React.useState<Record<string, boolean>>({});
+    const [selectedClientIndex, setSelectedClientIndex] = React.useState<ListSingleSelection>(null);
+    const [selectedJobsIndexes, setSelectedJobsIndexes] = React.useState<ListMultiSelection>([]);
 
     if (!clientsHandler.loaded || !jobsHandler.loaded) {
         return <LoadingSpinner />
     }
 
-    const selectedClientsLength = Object.keys(selectedClient).length;
-    const filteredJobs = jobsHandler.getJobs().filter((job) => job.status === JobStatus.InvoicePending && (selectedClientsLength === 0 || selectedClient[job.clientId] === true));
+    const clients = clientsHandler.getAll();
+    const selectedClient = selectedClientIndex === null ? null : clients[selectedClientIndex];
+    const clientSelected = selectedClient !== null && selectedClient !== undefined;
 
-    const clientItems: ListItem[] = clientsHandler.getClients().map((client) => ({
+    const jobs = jobsHandler.getAll();
+    const filteredJobs = jobs.filter((job) => job.status === JobStatus.InvoicePending && (!clientSelected || selectedClient.id === job.clientId));
+
+    const clientItems: ListItem[] = clients.map((client) => ({
         id: client.id,
         summary: {
             "name": client.name
@@ -58,10 +62,13 @@ export function Invoice({
 
             <List
                 items={clientItems}
-                selectedItems={selectedClient}
-                setSelectedItems={(client) => {
-                    setSelectedClient(client);
-                    setSelectedJobs({});
+                onClickItem={() => true}
+                selection={selectedClientIndex}
+                setSelection={(client) => {
+                    if (Array.isArray(client))
+                        throw new Error("Expected single selection");
+                    setSelectedClientIndex(client);
+                    setSelectedJobsIndexes([]);
                 }}
                 singleSelection
             />
@@ -70,8 +77,15 @@ export function Invoice({
 
             <List
                 items={filteredJobsItems}
-                selectedItems={selectedJobs}
-                setSelectedItems={setSelectedJobs}
+                onClickItem={() => true}
+                selection={selectedJobsIndexes}
+                setSelection={(newSelectedJobs) => {
+                    console.log(newSelectedJobs);
+                    if (Array.isArray(newSelectedJobs))
+                        setSelectedJobsIndexes(newSelectedJobs);
+                    else
+                        throw new Error("Expected multi selection");
+                }}
             />
         </div>
     );
