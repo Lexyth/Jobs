@@ -8,12 +8,7 @@ export type Value = string | number;
 
 export type StyledValue = { value: Value, className: string };
 
-// TODO: convert Item to Record<string, Value | StyledValue>
-
-export type Item = {
-    id: number,
-    summary: Record<string, Value | StyledValue>
-}
+export type Item = Record<string, Value | StyledValue>;
 
 export type SingleSelection = number | null;
 export type MultiSelection = Array<number>;
@@ -84,7 +79,7 @@ export function List({
         >
             {items.map((item, index) =>
                 <Item
-                    key={item.id}
+                    key={(typeof item["id"] === "object" ? item["id"].value : item["id"]) ?? index}
                     item={item}
                     onClick={() => handleClickItem(index)}
                     selected={(
@@ -112,9 +107,9 @@ function Item({
     className
 }: ItemProps) {
 
-    const children = Object.entries(item.summary).map(([key, value]) => {
-        const className = typeof value === "object" ? value.className : "";
-        const content = typeof value === "object" ? value.value : value;
+    const children = Object.entries(item).map(([key, value]) => {
+        const className = typeof value === "object" ? value["className"] : "";
+        const content = typeof value === "object" ? value["value"] : value;
         const child = (
             <p
                 className={twMerge(
