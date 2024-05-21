@@ -7,6 +7,7 @@ import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "../Jobs/hook";
 
 import { makeListItemsFromJobs } from "../Jobs/script";
+import { makeListItemsFromClients } from "../Clients/script";
 
 import { JobStatus } from "../Jobs/store";
 
@@ -42,14 +43,9 @@ export function Invoice({
     const jobs = jobsHandler.getAll();
     const filteredJobs = jobs.filter((job) => job.status === JobStatus.InvoicePending && (!clientSelected || selectedClient.id === job.clientId));
 
-    const clientItems: ListItem[] = clients.map((client) => ({
-        id: client.id,
-        summary: {
-            "name": client.name
-        }
-    }));
+    const clientItems: ListItem[] = makeListItemsFromClients(clients);
 
-    const filteredJobsItems = makeListItemsFromJobs(filteredJobs, clientsHandler);
+    const filteredJobsItems: ListItem[] = makeListItemsFromJobs(filteredJobs, clientsHandler);
 
     return (
         <div
