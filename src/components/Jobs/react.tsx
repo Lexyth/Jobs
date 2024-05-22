@@ -1,3 +1,8 @@
+import React from "react";
+
+import { EditableList } from "../../utils/components/EditableList/react";
+import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
+
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "./hook";
 
@@ -5,7 +10,7 @@ import { makeListItemsFromJobs } from "./script";
 
 import { JobStatus, type Job } from "./store";
 
-import { EditableList } from "../../utils/components/EditableList/react";
+import type { ItemValues as EditorItemValues, ItemData as EditorItemData } from "../../utils/components/Editor/react";
 
 type JobsProps = {
     className?: string
@@ -20,31 +25,23 @@ export function Jobs({
     const clientsHandler = useClientsHandler();
     const jobsHandler = useJobsHandler();
 
-    return <EditableList
-        className={className}
+    const handleCreateNewItem = React.useCallback(function (job: Job, newJobData: EditorItemValues) {
+        const clientName = newJobData["clientName"];
+        if (clientName === undefined)
+            throw new Error("Missing clientName in newJobData");
+        const newClient = clientsHandler.get(clientName);
+        if (newClient === undefined)
+            throw new Error(`Client not found (id: ${newJobData["clientId"]})`);
 
-        itemType="Job"
+        return {
+            ...job,
+            ...newJobData,
+            clientId: newClient.id
+        };
+    }, []);
 
-        loaded={jobsHandler.loaded && clientsHandler.loaded}
-
-        createNewItem={(job, newJobData) => {
-            const clientName = newJobData["clientName"];
-            if (clientName === undefined)
-                throw new Error("Missing clientName in newJobData");
-            const newClient = clientsHandler.get(clientName);
-            if (newClient === undefined)
-                throw new Error(`Client not found (id: ${newJobData["clientId"]})`);
-
-            return {
-                ...job,
-                ...newJobData,
-                clientId: newClient.id
-            };
-        }}
-
-        handler={jobsHandler}
-
-        makeItemData={(job: Job) => ({
+    const handleMakeItemData = React.useCallback(function (job: Job): EditorItemData {
+        return {
             clientName: {
                 title: "Client",
                 type: "select",
@@ -118,25 +115,45 @@ export function Jobs({
                     current: defaultData.value === job.status
                 }))
             }
-        })}
+        };
+    }, []);
+
+    const handleCreateDefaultItem = React.useCallback(function () {
+        const fullDate = new Date();
+        const date = fullDate.getFullYear() + "-" + ("0" + (fullDate.getMonth() + 1)).slice(-2) + "-" + ("0" + fullDate.getDate()).slice(-2);
+
+        return {
+            id: 0,
+            clientId: 0,
+            date,
+            description: "",
+            price: 0,
+            count: 1,
+            total: 0,
+            vat: 0,
+            status: JobStatus.InProgress
+        };
+    }, []);
+
+    if (!clientsHandler.loaded || !jobsHandler.loaded) {
+        return <LoadingSpinner />;
+    }
+
+    const jobs: Job[] = jobsHandler.getAll();
+
+    return <EditableList<Job>
+        className={className}
+
+        items={jobs}
+
+        createNewItem={handleCreateNewItem}
+
+        handler={jobsHandler}
+
+        makeItemData={handleMakeItemData}
 
         makeListItems={(jobs) => makeListItemsFromJobs(jobs, clientsHandler)}
 
-        createDefaultItem={() => {
-            const fullDate = new Date();
-            const date = fullDate.getFullYear() + "-" + ("0" + (fullDate.getMonth() + 1)).slice(-2) + "-" + ("0" + fullDate.getDate()).slice(-2);
-
-            return {
-                id: 0,
-                clientId: 0,
-                date,
-                description: "",
-                price: 0,
-                count: 1,
-                total: 0,
-                vat: 0,
-                status: JobStatus.InProgress
-            };
-        }}
+        createDefaultItem={handleCreateDefaultItem}
     />;
 }

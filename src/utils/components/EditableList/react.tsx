@@ -16,8 +16,7 @@ import { type Client } from "../../../components/Clients/store";
 
 type EditableListProps<Type extends Job | Client> = {
     className?: string | undefined,
-    loaded: boolean,
-    itemType: string,
+    items: Type[],
     createNewItem: (item: Type, itemData: EditorItemValues) => Type,
     handler: Type extends Job ? JobsHandler : Type extends Client ? ClientsHandler : never,
     makeItemData: (item: Type) => EditorItemData,
@@ -28,7 +27,6 @@ type EditableListProps<Type extends Job | Client> = {
 type ItemEditorProps<Type extends Job | Client> = {
     item: Type,
     onCancel: () => void,
-    itemType: string,
     createNewItem: (item: Type, itemData: EditorItemValues) => Type,
     handler: Type extends Job ? JobsHandler : Type extends Client ? ClientsHandler : never,
     makeItemData: (item: Type) => EditorItemData
@@ -36,8 +34,7 @@ type ItemEditorProps<Type extends Job | Client> = {
 
 export function EditableList<Type extends Job | Client>({
     className,
-    loaded,
-    itemType,
+    items,
     createNewItem,
     handler,
     makeItemData,
@@ -61,11 +58,10 @@ export function EditableList<Type extends Job | Client>({
         setItemToEdit(newItem);
     }, []);
 
-    if (!loaded) {
+    if (!handler.loaded) {
         return <LoadingSpinner />;
     }
 
-    const items = handler.getAll() as Type[];
     const listItems: ListItem[] = makeListItems(items);
 
     return (
@@ -76,12 +72,12 @@ export function EditableList<Type extends Job | Client>({
             )}
         >
             {itemToEdit !== null &&
-                <ItemEditor item={itemToEdit} onCancel={() => setItemToEdit(null)} itemType={itemType} createNewItem={createNewItem} handler={handler} makeItemData={makeItemData} />
+                <ItemEditor item={itemToEdit} onCancel={() => setItemToEdit(null)} createNewItem={createNewItem} handler={handler} makeItemData={makeItemData} />
             }
 
             <List items={listItems} onClickItem={handleClickItem} />
 
-            <Button title={`Add New ${itemType}`} onClick={handleAddNewItem} />
+            <Button title={`Add`} onClick={handleAddNewItem} />
         </div>
     );
 }
@@ -89,7 +85,6 @@ export function EditableList<Type extends Job | Client>({
 function ItemEditor<Type extends Job | Client>({
     item,
     onCancel,
-    itemType,
     createNewItem,
     handler,
     makeItemData
@@ -99,7 +94,7 @@ function ItemEditor<Type extends Job | Client>({
         onCancel();
 
         if (item === null)
-            throw new Error(`No ${itemType} to edit`);
+            throw new Error(`No Item to edit`);
 
         const newItem = createNewItem(item, newItemData);
 
