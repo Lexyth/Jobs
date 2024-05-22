@@ -107,7 +107,7 @@ function Item({
     className
 }: ItemProps) {
 
-    const children = Object.entries(item).map(([key, value]) => {
+    const children = Object.entries(item).filter(([key, _]) => key !== "id").map(([key, value]) => {
         const className = typeof value === "object" ? value["className"] : "";
         const content = typeof value === "object" ? value["value"] : value;
         const child = (
