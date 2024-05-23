@@ -10,7 +10,7 @@ import { twMerge } from "tailwind-merge";
 import type { DataEntryProps } from "../DataEntry/hook";
 
 export type ItemData = Record<string, DataEntryProps>;
-export type ItemValues = Record<string, Value>;
+export type ItemValues = Record<string, string>;
 
 type DataEntries = Record<string, JSX.Element>;
 

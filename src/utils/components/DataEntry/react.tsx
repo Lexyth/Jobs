@@ -2,23 +2,21 @@ import React, { type HTMLInputTypeAttribute } from "react";
 
 import { twMerge } from "tailwind-merge";
 
-export type Value = string | number;
-
 export type DataEntryProps = {
     title: string,
     type?: "input" | "label" | "textarea" | "select" | "datalist",
     inputType?: HTMLInputTypeAttribute,
     defaultDatas?: {
         description?: string,
-        value: Value,
+        value: string,
         current?: boolean
     }[],
     className?: string
 };
 
 type ValueState = {
-    value: Value,
-    setValue: React.Dispatch<React.SetStateAction<Value>>
+    value: string,
+    setValue: React.Dispatch<React.SetStateAction<string>>
 };
 
 export function DataEntry({

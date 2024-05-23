@@ -82,26 +82,26 @@ export function Jobs({
                 type: "datalist",
                 inputType: "number",
                 defaultDatas: [
-                    { current: true, value: job.price },
-                    { description: "Global", value: 0 },
-                    { description: "Client - Word Price", value: 0 },
-                    { description: "Client - Line Price", value: 0 },
-                    { description: "Client - Page Price", value: 0 },
-                    { description: "Suggested", value: 0 }
+                    { current: true, value: job.price.toString() },
+                    { description: "Global", value: "0" },
+                    { description: "Client - Word Price", value: "0" },
+                    { description: "Client - Line Price", value: "0" },
+                    { description: "Client - Page Price", value: "0" },
+                    { description: "Suggested", value: "0" }
                 ]
             },
             count: {
                 title: "Count",
                 inputType: "number",
                 defaultDatas: [
-                    { current: true, value: job.count }
+                    { current: true, value: job.count.toString() }
                 ]
             },
             total: {
                 title: "Total",
                 inputType: "number",
                 defaultDatas: [
-                    { current: true, value: job.total }
+                    { current: true, value: job.total.toString() }
                 ]
             },
             vat: {
@@ -109,23 +109,18 @@ export function Jobs({
                 type: "datalist",
                 inputType: "number",
                 defaultDatas: [
-                    { current: true, value: job.vat },
-                    { description: "Global", value: 0.19 },
-                    { description: "Client", value: 0.07 },
-                    { description: "Suggested", value: 0 }
+                    { current: true, value: job.vat.toString() },
+                    { description: "Global", value: "0.19" },
+                    { description: "Client", value: "0.07" },
+                    { description: "Suggested", value: "0" }
                 ]
             },
             status: {
                 title: "Status",
                 type: "select",
-                defaultDatas: [
-                    { value: JobStatus.InProgress },
-                    { value: JobStatus.InvoicePending },
-                    { value: JobStatus.AwaitingPayment },
-                    { value: JobStatus.Closed }
-                ].map((defaultData) => ({
-                    ...defaultData,
-                    current: defaultData.value === job.status
+                defaultDatas: Object.entries(JobStatus).map(([_key, value]) => ({
+                    value: value,
+                    current: value === job.status
                 }))
             }
         };
