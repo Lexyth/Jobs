@@ -23,7 +23,8 @@ type EditableListProps<Type extends Job | Client> = {
     handler: Type extends Job ? JobsHandler : Type extends Client ? ClientsHandler : never,
     makeItemData: (item: Type) => DataEntryItemData,
     makeListItems: (items: Type[]) => ListItem[],
-    createDefaultItem: () => Type
+    createDefaultItem: () => Type,
+    filterEntries?: [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element][]
 };
 
 type ItemEditorProps<Type extends Job | Client> = {
@@ -41,7 +42,8 @@ export function EditableList<Type extends Job | Client>({
     handler,
     makeItemData,
     makeListItems,
-    createDefaultItem
+    createDefaultItem,
+    filterEntries
 }: EditableListProps<Type>): JSX.Element {
     const [itemToEdit, setItemToEdit] = React.useState<Type | null>(null);
 
@@ -77,7 +79,7 @@ export function EditableList<Type extends Job | Client>({
                 <ItemEditor item={itemToEdit} onCancel={() => setItemToEdit(null)} createNewItem={createNewItem} handler={handler} makeItemData={makeItemData} />
             }
 
-            <List items={listItems} onClickItem={handleClickItem} />
+            <List items={listItems} onClickItem={handleClickItem} {...(filterEntries ? { filterEntries } : {})} />
 
             <Button title={`Add`} onClick={handleAddNewItem} />
         </div>
