@@ -5,25 +5,37 @@ import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "./hook";
+import { useDataEntry } from "../../utils/components/DataEntry/hook";
 
 import { makeListItemsFromJobs } from "./script";
 
 import { JobStatus, type Job } from "./store";
-
 import type { ItemValues as EditorItemValues, ItemData as EditorItemData } from "../../utils/components/Editor/react";
 
 type JobsProps = {
     className?: string
 };
 
-// TODO?: add a filter by client, status, and month (or whatever the files are split on)
-// TODO?: add sort by date or price, ascending and descending
-
 export function Jobs({
     className
 }: JobsProps): JSX.Element {
     const clientsHandler = useClientsHandler();
     const jobsHandler = useJobsHandler();
+
+    const [filterClientName, setFilterClientName, filterClientNameComponent] = useDataEntry({
+        title: "Client Name"
+    });
+
+    const [filterStatus, setFilterStatus, filterStatusComponent] = useDataEntry({
+        title: "Status",
+        type: "select",
+        defaultDatas: [
+            { value: "" },
+            ...Object.entries(JobStatus).map(([_key, value]) => ({
+                value: value
+            }))
+        ]
+    });
 
     const handleCreateNewItem = React.useCallback(function (job: Job, newJobData: EditorItemValues) {
         const clientName = newJobData["clientName"];
@@ -139,21 +151,36 @@ export function Jobs({
         return <LoadingSpinner />;
     }
 
-    const jobs: Job[] = jobsHandler.getAll();
+    let jobs: Job[] = jobsHandler.getAll();
 
-    return <EditableList<Job>
-        className={className}
+    if (filterClientName !== "") {
+        jobs = jobs.filter((job) => clientsHandler.get(job.clientId)?.name.toLowerCase().includes(filterClientName.toLowerCase()));
+    }
 
-        items={jobs}
+    if (filterStatus !== "") {
+        jobs = jobs.filter((job) => job.status === filterStatus);
+    }
 
-        createNewItem={handleCreateNewItem}
+    return (
+        <EditableList<Job>
+            className={className}
 
-        handler={jobsHandler}
+            items={jobs}
 
-        makeItemData={handleMakeItemData}
+            createNewItem={handleCreateNewItem}
 
-        makeListItems={(jobs) => makeListItemsFromJobs(jobs, clientsHandler)}
+            handler={jobsHandler}
 
-        createDefaultItem={handleCreateDefaultItem}
-    />;
+            makeItemData={handleMakeItemData}
+
+            makeListItems={(jobs) => makeListItemsFromJobs(jobs, clientsHandler)}
+
+            createDefaultItem={handleCreateDefaultItem}
+
+            filterEntries={[
+                [filterClientName, setFilterClientName, filterClientNameComponent],
+                [filterStatus, setFilterStatus, filterStatusComponent]
+            ]}
+        />
+    );
 }
