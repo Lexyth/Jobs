@@ -3,13 +3,15 @@ import { twMerge } from "tailwind-merge";
 type ButtonProps = {
     title: string,
     onClick: () => void,
-    className?: string
+    className?: string,
+    attributes?: React.ButtonHTMLAttributes<HTMLButtonElement>
 };
 
 export function Button({
     title,
     onClick,
-    className
+    className,
+    attributes
 }: ButtonProps): JSX.Element {
     return (
         <button
@@ -18,6 +20,7 @@ export function Button({
                 className
             )}
             onClick={onClick}
+            {...attributes}
         >
             {title}
         </button>
