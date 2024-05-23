@@ -9,7 +9,8 @@ import { useDataEntry } from "../../utils/components/DataEntry/hook";
 
 import { makeListItemsFromJobs } from "./script";
 
-import { JobStatus, type Job } from "./store";
+import { JobStatus } from "./store";
+import type { Job } from "./store";
 import type { ItemValues as EditorItemValues, ItemData as EditorItemData } from "../../utils/components/Editor/react";
 
 type JobsProps = {

@@ -1,5 +1,5 @@
-export function enumMemberFromString(string: string, _enum: any) {
-    const entries = Object.entries(_enum);
+export function enumMemberFromString(string: string, enumObj: any) {
+    const entries = Object.entries(enumObj);
     const index = entries.findIndex(([, v]) => v === string);
     if (index === -1) {
         throw new Error("Invalid enum value: " + string);
@@ -8,6 +8,6 @@ export function enumMemberFromString(string: string, _enum: any) {
     if (entry === undefined) {
         throw new Error("Invalid enum value: " + string);
     }
-    let e = _enum[entry[0] as keyof typeof _enum];
+    let e = enumObj[entry[0] as keyof typeof enumObj];
     return e;
 }

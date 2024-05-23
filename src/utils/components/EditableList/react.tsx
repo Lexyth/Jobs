@@ -1,8 +1,8 @@
 import React from "react";
 
 import { Modal } from "../Modal/react";
-import { List, type Item as ListItem } from "../List/react";
-import { Editor, type ItemValues as EditorItemValues, type ItemData as EditorItemData } from "../Editor/react";
+import { List } from "../List/react";
+import { Editor } from "../Editor/react";
 import { Button } from "../Button/react";
 import { LoadingSpinner } from "../LoadingSpinner/react";
 
@@ -12,14 +12,16 @@ import { ClientsHandler } from "../../../components/Clients/clientsHandler";
 import { twMerge } from "tailwind-merge";
 
 import type { Job } from "../../../components/Jobs/store";
-import { type Client } from "../../../components/Clients/store";
+import type { Client } from "../../../components/Clients/store";
+import type { Item as ListItem } from "../List/react";
+import type { ItemValues as EditorItemValues, ItemData as DataEntryItemData } from "../Editor/react";
 
 type EditableListProps<Type extends Job | Client> = {
     className?: string | undefined,
     items: Type[],
     createNewItem: (item: Type, itemData: EditorItemValues) => Type,
     handler: Type extends Job ? JobsHandler : Type extends Client ? ClientsHandler : never,
-    makeItemData: (item: Type) => EditorItemData,
+    makeItemData: (item: Type) => DataEntryItemData,
     makeListItems: (items: Type[]) => ListItem[],
     createDefaultItem: () => Type
 };
@@ -29,7 +31,7 @@ type ItemEditorProps<Type extends Job | Client> = {
     onCancel: () => void,
     createNewItem: (item: Type, itemData: EditorItemValues) => Type,
     handler: Type extends Job ? JobsHandler : Type extends Client ? ClientsHandler : never,
-    makeItemData: (item: Type) => EditorItemData
+    makeItemData: (item: Type) => DataEntryItemData
 }
 
 export function EditableList<Type extends Job | Client>({
@@ -108,7 +110,7 @@ function ItemEditor<Type extends Job | Client>({
             handler.remove(item as Job & Client);
     }, [handler, item]);
 
-    const itemData: EditorItemData = makeItemData(item);
+    const itemData: DataEntryItemData = makeItemData(item);
 
     return (
         <Modal onClickOutside={onCancel}>

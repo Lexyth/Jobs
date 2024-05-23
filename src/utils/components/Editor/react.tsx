@@ -1,11 +1,13 @@
 import React from "react";
 
-import { Modal } from "../Modal/react.jsx";
-import { Button } from "../Button/react.jsx";
+import { Modal } from "../Modal/react";
+import { Button } from "../Button/react";
 
-import { useDataEntry, type DataEntryProps, type Value } from "../DataEntry/hook.jsx";
+import { useDataEntry } from "../DataEntry/hook";
 
 import { twMerge } from "tailwind-merge";
+
+import type { DataEntryProps } from "../DataEntry/hook";
 
 export type ItemData = Record<string, DataEntryProps>;
 export type ItemValues = Record<string, Value>;

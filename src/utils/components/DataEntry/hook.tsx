@@ -1,7 +1,9 @@
 import React from "react";
 
-import { DataEntry, type DataEntryProps, type Value } from "./react";
-export { type DataEntryProps, type Value };
+import { DataEntry } from "./react";
+
+import type { DataEntryProps } from "./react";
+export type { DataEntryProps };
 
 export function useDataEntry({
     title,
@@ -15,4 +17,3 @@ export function useDataEntry({
 
     return [value, component];
 }
-
