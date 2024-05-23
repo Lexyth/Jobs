@@ -10,10 +10,10 @@ export function useDataEntry({
     type = "input",
     inputType = "text",
     defaultDatas = []
-}: DataEntryProps): [Value, JSX.Element] {
+}: DataEntryProps): [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element] {
     const [value, setValue] = React.useState(defaultDatas.find(defaultData => defaultData.current === true)?.value ?? "");
 
     const component = <DataEntry key={title} title={title} type={type} inputType={inputType} defaultDatas={defaultDatas} value={value} setValue={setValue} />;
 
-    return [value, component];
+    return [value, setValue, component];
 }
