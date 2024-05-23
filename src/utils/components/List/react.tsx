@@ -1,6 +1,7 @@
 import React from "react";
 
 import { twMerge } from "tailwind-merge";
+import { Button } from "../Button/react";
 
 // TODO?: extract a SelectionList component from List
 
@@ -25,14 +26,27 @@ type ListProps = {
     items: Item[],
     /** return true if item selection should change as result of click*/
     onClickItem?: (itemId: number) => boolean | void,
+    filterEntries?: [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element][],
     className?: string
 } & Partial<SelectionProps>;
+
+type ItemProps = {
+    item: Item,
+    onClick?: () => void,
+    selected?: boolean,
+    className?: string
+};
+
+type FilterProps = {
+    entries: [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element][],
+}
 
 export function List({
     items,
     onClickItem,
     selection,
     setSelection,
+    filterEntries,
     className
 }: ListProps) {
 
@@ -77,6 +91,8 @@ export function List({
                 className
             )}
         >
+            {filterEntries && <Filter entries={filterEntries} />}
+
             {items.map((item, index) =>
                 <Item
                     key={(typeof item["id"] === "object" ? item["id"].value : item["id"]) ?? index}
@@ -93,13 +109,6 @@ export function List({
     );
 }
 
-type ItemProps = {
-    item: Item,
-    onClick?: () => void,
-    selected?: boolean,
-    className?: string
-};
-
 function Item({
     item,
     onClick,
@@ -107,7 +116,7 @@ function Item({
     className
 }: ItemProps) {
 
-    const children = Object.entries(item).filter(([key, _]) => key !== "id").map(([key, value]) => {
+    const children = Object.entries(item).filter(([key, _value]) => key !== "id").map(([key, value]) => {
         const className = typeof value === "object" ? value["className"] : "";
         const content = typeof value === "object" ? value["value"] : value;
         const child = (
@@ -132,9 +141,46 @@ function Item({
             )}
             onClick={onClick}
         >
-            {
-                children
-            }
+            {children}
+        </div>
+    );
+}
+
+function Filter({
+    entries
+}: FilterProps): JSX.Element {
+    const [visible, setVisible] = React.useState(false);
+
+    if (!visible) {
+        return (
+            <div>
+                <Button
+                    title="Filter"
+                    onClick={() => setVisible(true)}
+                />
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <div>
+                {entries.map(entry => entry[2])}
+            </div>
+            <div>
+                <Button
+                    title="Clear"
+                    onClick={() => {
+                        for (const entry of entries) {
+                            entry[1]("");
+                        }
+                    }}
+                />
+                <Button
+                    title="Close"
+                    onClick={() => setVisible(false)}
+                />
+            </div>
         </div>
     );
 }
