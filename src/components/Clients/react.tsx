@@ -4,13 +4,12 @@ import { EditableList } from "../../utils/components/EditableList/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "./hook";
+import { useDataEntry } from "../../utils/components/DataEntry/hook";
 
 import { makeListItemsFromClients } from "./script";
 
 import { type Client } from "./store";
 import { type ItemValues as EditorItemValues } from "../../utils/components/Editor/react";
-
-// TODO?: add a search field to search for a client
 
 type ClientsProps = {
     className?: string
@@ -21,6 +20,10 @@ export function Clients({
 }: ClientsProps): JSX.Element {
 
     const clientsHandler = useClientsHandler();
+
+    const [filterClientName, setFilterClientName, filterClientNameComponent] = useDataEntry({
+        title: "Client Name"
+    });
 
     const handleCreateNewItem = React.useCallback(function (client: Client, newClientData: EditorItemValues) {
         return {
@@ -51,21 +54,31 @@ export function Clients({
         return <LoadingSpinner />;
     }
 
-    const clients: Client[] = clientsHandler.getAll();
+    let clients: Client[] = clientsHandler.getAll();
 
-    return <EditableList<Client>
-        className={className}
+    if (filterClientName !== "") {
+        clients = clients.filter((client) => client.name.toLowerCase().includes(filterClientName.toLowerCase()));
+    }
 
-        items={clients}
+    return (
+        <EditableList<Client>
+            className={className}
 
-        createNewItem={handleCreateNewItem}
+            items={clients}
 
-        handler={clientsHandler}
+            createNewItem={handleCreateNewItem}
 
-        makeItemData={handleMakeItemData}
+            handler={clientsHandler}
 
-        makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
+            makeItemData={handleMakeItemData}
 
-        createDefaultItem={handleCreateDefaultItem}
-    />;
+            makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
+
+            createDefaultItem={handleCreateDefaultItem}
+
+            filterEntries={[
+                [filterClientName, setFilterClientName, filterClientNameComponent]
+            ]}
+        />
+    );
 }
