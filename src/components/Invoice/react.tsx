@@ -16,11 +16,54 @@ import { JobStatus } from "../Jobs/store";
 import { twMerge } from "tailwind-merge";
 import { useDataEntry } from "../../utils/components/DataEntry/hook";
 
-// TODO: add a list of all the past invoices, including a way to re-"print" them
+// TODO?: add a list of all the past invoices, including a way to re-"print" them
+
+// TODO: only show any jobs when a client is selected. We need a client to create an invoice, not just a list of jobs. Also, remove the filter for jobs by client name, since they'll all be by the same client.
 
 // TODO: select all jobs button
 
 // TODO!: create an invoice entry, from which one can generate the pdf or click on it to overwrite all parameters (showing the original next to it)
+
+// TODO!: All data in an Invoice entry must be editable.
+
+/* Invoice needs following data:
+ *
+ * From User:
+ * UST-ID-Nr.
+ * Steuer-Nr.
+
+ * From Invoice (changes with each invoice):
+ * Datum
+ * Rechnungs-Nr.
+
+ * From Client:
+ * Rechnung an
+ * Versand an
+ * 
+ * UST-ID-Nr. Kunde
+ * Bestell-Nr.
+ * Zahlungsbedingungen
+ * Liefer-Nr. Kunde
+ * Kunden-Nr.
+ * ? Abrechnung vom
+
+ * From Item:
+ * Position
+ * Ausgeführt
+ * Artikel-Nr.
+ * Artikel-Bez.
+ * Beschreibung
+ * Anzahl 
+ * Preis
+ * MwSt. %
+ * MwSt. (consider displaying it as: X.XX€ (Y %))
+ * Netto Summe
+ * Brutto Summe
+ 
+ * Netto Summe
+ * MwSt. Summe
+ * Brutto Summe
+*/
 
 type InvoiceProps = {
     className?: string
@@ -60,7 +103,6 @@ function InvoiceCreator({
     const jobsHandler = useJobsHandler();
 
     const [selectedClientId, setSelectedClientId] = React.useState<ListSingleSelection>(null);
-    const [selectedJobsIndexes, setSelectedJobsIndexes] = React.useState<ListMultiSelection>([]);
     const [selectedJobsIds, setSelectedJobsIds] = React.useState<ListMultiSelection>([]);
 
     const [clientsFilterClientName, setClientsFilterClientName, clientsFilterClientNameComponent] = useDataEntry({
@@ -112,7 +154,6 @@ function InvoiceCreator({
                 setSelection={(clientIndex) => {
                     if (Array.isArray(clientIndex))
                         throw new Error("Expected single selection");
-                    setSelectedJobsIndexes([]);
                     const client = clientIndex === null ? null : clients[clientIndex];
                     setSelectedClientId(client?.id ?? null);
                 }}
@@ -155,8 +196,8 @@ function InvoiceCreator({
             <Button
                 title="Create Invoice"
                 onClick={() => {
-                    const selectedClientName = selectedClient?.id;
-                    const selectedJobs = filteredJobsItems.filter((_value, index) => selectedJobsIndexes.includes(index));
+                    const selectedClientName = `${selectedClient?.name}(#${selectedClient?.id})`;
+                    const selectedJobs = filteredJobs.filter((job) => selectedJobsIds.includes(job.id));
                     const jobsString = JSON.stringify(selectedJobs);
 
                     console.debug(`Creating an invoice for client ${selectedClientName} from jobs ${jobsString}`);
