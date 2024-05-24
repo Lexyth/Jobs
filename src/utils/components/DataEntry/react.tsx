@@ -10,9 +10,9 @@ type EntryTypesMapping = {
   datalist: React.InputHTMLAttributes<HTMLInputElement>;
 };
 
-type EntryTypeProps<Type extends keyof EntryTypesMapping> = {
-  type?: Type;
-  attributes?: EntryTypesMapping[Type];
+type EntryTypeProps = {
+  type?: keyof EntryTypesMapping;
+  attributes?: EntryTypesMapping[keyof EntryTypesMapping];
 };
 
 type ValueState = {
@@ -20,7 +20,7 @@ type ValueState = {
   setValue: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export type DataEntryProps<EntryType extends keyof EntryTypesMapping> = {
+export type DataEntryProps = {
   title: string;
   defaultDatas?: {
     description?: string;
@@ -28,18 +28,17 @@ export type DataEntryProps<EntryType extends keyof EntryTypesMapping> = {
     current?: boolean;
   }[];
   className?: string;
-} & EntryTypeProps<EntryType> &
-  ValueState;
+} & EntryTypeProps;
 
-export function DataEntry<EntryType extends keyof EntryTypesMapping>({
+export function DataEntry({
   title,
-  type = "input" as EntryType,
+  type = "input",
   defaultDatas = [],
   attributes,
   value,
   setValue,
   className,
-}: DataEntryProps<EntryType>) {
+}: DataEntryProps & ValueState) {
   const id = React.useId();
 
   const options = defaultDatas.map((defaultData) => (
@@ -59,10 +58,10 @@ export function DataEntry<EntryType extends keyof EntryTypesMapping>({
           {...((attributes as EntryTypesMapping["input"])?.type === "number"
             ? { min: 0, step: 0.01 }
             : {})}
-          className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
           value={value}
           onChange={(event) => setValue(event.target.value)}
           {...(attributes as EntryTypesMapping["input"])}
+          className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         />
       );
       break;
@@ -70,8 +69,8 @@ export function DataEntry<EntryType extends keyof EntryTypesMapping>({
     case "label":
       element = (
         <label
-          className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
           {...(attributes as EntryTypesMapping["label"])}
+          className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         >
           {value}
         </label>
@@ -81,10 +80,10 @@ export function DataEntry<EntryType extends keyof EntryTypesMapping>({
     case "textarea":
       element = (
         <textarea
-          className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
           value={value}
           onChange={(event) => setValue(event.target.value)}
           {...(attributes as EntryTypesMapping["textarea"])}
+          className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         />
       );
       break;
@@ -92,10 +91,10 @@ export function DataEntry<EntryType extends keyof EntryTypesMapping>({
     case "select":
       element = (
         <select
-          className="max-w-[75%] m-1 p-1 indent-2 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
           value={value}
           onChange={(event) => setValue(event.target.value)}
           {...(attributes as EntryTypesMapping["select"])}
+          className="max-w-[75%] m-1 p-1 indent-2 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         >
           {options}
         </select>
@@ -107,7 +106,6 @@ export function DataEntry<EntryType extends keyof EntryTypesMapping>({
       element = (
         <>
           <input
-            className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
             {...((attributes as EntryTypesMapping["datalist"])?.type ===
             "number"
               ? { min: 0, step: 0.01 }
@@ -116,6 +114,7 @@ export function DataEntry<EntryType extends keyof EntryTypesMapping>({
             value={value}
             onChange={(event) => setValue(event.target.value)}
             {...(attributes as EntryTypesMapping["datalist"])}
+            className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
           />
 
           <datalist id={datalistId}>{options}</datalist>

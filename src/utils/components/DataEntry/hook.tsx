@@ -6,14 +6,31 @@ import type { DataEntryProps } from "./react";
 export type { DataEntryProps };
 
 export function useDataEntry({
-    title,
-    type = "input",
-    inputType = "text",
-    defaultDatas = []
-}: DataEntryProps): [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element] {
-    const [value, setValue] = React.useState(defaultDatas.find(defaultData => defaultData.current === true)?.value ?? "");
+  title,
+  type = "input",
+  defaultDatas = [],
+  attributes,
+}: DataEntryProps): [
+  string,
+  React.Dispatch<React.SetStateAction<string>>,
+  JSX.Element
+] {
+  const [value, setValue] = React.useState(
+    defaultDatas.find((defaultData) => defaultData.current === true)?.value ??
+      ""
+  );
 
-    const component = <DataEntry key={title} title={title} type={type} inputType={inputType} defaultDatas={defaultDatas} value={value} setValue={setValue} />;
+  const component = (
+    <DataEntry
+      key={title}
+      title={title}
+      type={type}
+      defaultDatas={defaultDatas}
+      {...(attributes && { attributes })}
+      value={value}
+      setValue={setValue}
+    />
+  );
 
-    return [value, setValue, component];
+  return [value, setValue, component];
 }

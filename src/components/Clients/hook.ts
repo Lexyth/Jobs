@@ -6,16 +6,16 @@ import { ClientsHandler } from "./clientsHandler";
 // TODO: useClients should become obsolete and ClientsHandler should expose subscribe and getSnapshot methods; maybe get() suffices if ClientsHandler can guarantee immutability
 
 export function useClients() {
-    const clients = React.useSyncExternalStore(
-        clientsStore.subscribe,
-        clientsStore.getSnapshot
-    );
+  const clients = React.useSyncExternalStore(
+    clientsStore.subscribe,
+    clientsStore.getSnapshot
+  );
 
-    return clients;
+  return clients;
 }
 
 export function useClientsHandler() {
-    useClients();
+  useClients();
 
-    return new ClientsHandler();
+  return new ClientsHandler();
 }

@@ -12,73 +12,68 @@ import { type Client } from "./store";
 import { type ItemValues as EditorItemValues } from "../../utils/components/Editor/react";
 
 type ClientsProps = {
-    className?: string
+  className?: string;
 };
 
-export function Clients({
-    className
-}: ClientsProps): JSX.Element {
+export function Clients({ className }: ClientsProps): JSX.Element {
+  const clientsHandler = useClientsHandler();
 
-    const clientsHandler = useClientsHandler();
-
-    const [filterClientName, setFilterClientName, filterClientNameComponent] = useDataEntry({
-        title: "Client Name"
+  const [filterClientName, setFilterClientName, filterClientNameComponent] =
+    useDataEntry({
+      title: "Client Name",
     });
 
-    const handleCreateNewItem = React.useCallback(function (client: Client, newClientData: EditorItemValues) {
-        return {
-            ...client,
-            ...newClientData
-        }
-    }, []);
+  const handleCreateNewItem = React.useCallback(function (
+    client: Client,
+    newClientData: EditorItemValues
+  ) {
+    return {
+      ...client,
+      ...newClientData,
+    };
+  },
+  []);
 
-    const handleMakeItemData = React.useCallback(function (client: Client) {
-        return {
-            name: {
-                title: "Name",
-                defaultDatas: [
-                    { current: true, value: client.name }
-                ]
-            }
-        }
-    }, []);
+  const handleMakeItemData = React.useCallback(function (client: Client) {
+    return {
+      name: {
+        title: "Name",
+        defaultDatas: [{ current: true, value: client.name }],
+      },
+    };
+  }, []);
 
-    const handleCreateDefaultItem = React.useCallback(function () {
-        return {
-            id: 0,
-            name: "Unknown Client"
-        }
-    }, []);
+  const handleCreateDefaultItem = React.useCallback(function () {
+    return {
+      id: 0,
+      name: "Unknown Client",
+    };
+  }, []);
 
-    if (!clientsHandler.loaded) {
-        return <LoadingSpinner />;
-    }
+  if (!clientsHandler.loaded) {
+    return <LoadingSpinner />;
+  }
 
-    let clients: Client[] = clientsHandler.getAll();
+  let clients: Client[] = clientsHandler.getAll();
 
-    if (filterClientName !== "") {
-        clients = clients.filter((client) => client.name.toLowerCase().includes(filterClientName.toLowerCase()));
-    }
-
-    return (
-        <EditableList<Client>
-            className={className}
-
-            items={clients}
-
-            createNewItem={handleCreateNewItem}
-
-            handler={clientsHandler}
-
-            makeItemData={handleMakeItemData}
-
-            makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
-
-            createDefaultItem={handleCreateDefaultItem}
-
-            filterEntries={[
-                [filterClientName, setFilterClientName, filterClientNameComponent]
-            ]}
-        />
+  if (filterClientName !== "") {
+    clients = clients.filter((client) =>
+      client.name.toLowerCase().includes(filterClientName.toLowerCase())
     );
+  }
+
+  return (
+    <EditableList<Client>
+      items={clients}
+      createNewItem={handleCreateNewItem}
+      handler={clientsHandler}
+      makeItemData={handleMakeItemData}
+      makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
+      createDefaultItem={handleCreateDefaultItem}
+      filterEntries={[
+        [filterClientName, setFilterClientName, filterClientNameComponent],
+      ]}
+      className={className}
+    />
+  );
 }

@@ -11,172 +11,176 @@ import { makeListItemsFromJobs } from "./script";
 
 import { JobStatus } from "./store";
 import type { Job } from "./store";
-import type { ItemValues as EditorItemValues, ItemData as EditorItemData } from "../../utils/components/Editor/react";
+import type {
+  ItemValues as EditorItemValues,
+  ItemData as EditorItemData,
+} from "../../utils/components/Editor/react";
 
 type JobsProps = {
-    className?: string
+  className?: string;
 };
 
-export function Jobs({
-    className
-}: JobsProps): JSX.Element {
-    const clientsHandler = useClientsHandler();
-    const jobsHandler = useJobsHandler();
+export function Jobs({ className }: JobsProps): JSX.Element {
+  const clientsHandler = useClientsHandler();
+  const jobsHandler = useJobsHandler();
 
-    const [filterClientName, setFilterClientName, filterClientNameComponent] = useDataEntry({
-        title: "Client Name"
+  const [filterClientName, setFilterClientName, filterClientNameComponent] =
+    useDataEntry({
+      title: "Client Name",
     });
 
-    const [filterStatus, setFilterStatus, filterStatusComponent] = useDataEntry({
+  const [filterStatus, setFilterStatus, filterStatusComponent] = useDataEntry({
+    title: "Status",
+    type: "select",
+    defaultDatas: [
+      { value: "" },
+      ...Object.entries(JobStatus).map(([_key, value]) => ({
+        value: value,
+      })),
+    ],
+  });
+
+  const handleCreateNewItem = React.useCallback(function (
+    job: Job,
+    newJobData: EditorItemValues
+  ) {
+    const clientName = newJobData["clientName"];
+    if (clientName === undefined)
+      throw new Error("Missing clientName in newJobData");
+    const newClient = clientsHandler.get(clientName);
+    if (newClient === undefined)
+      throw new Error(`Client not found (id: ${newJobData["clientId"]})`);
+
+    return {
+      ...job,
+      ...newJobData,
+      clientId: newClient.id,
+    };
+  },
+  []);
+
+  const handleMakeItemData = React.useCallback(function (
+    job: Job
+  ): EditorItemData {
+    return {
+      clientName: {
+        title: "Client",
+        type: "select",
+        defaultDatas: clientsHandler.getAll().map((client) => ({
+          current: client.id === job.clientId,
+          value: client.name,
+        })),
+      },
+      date: {
+        title: "Date",
+        attributes: { type: "date" },
+        defaultDatas: [{ current: true, value: job.date }],
+      },
+      description: {
+        title: "Description",
+        type: "textarea",
+        defaultDatas: [{ current: true, value: job.description }],
+      },
+      price: {
+        title: "Price",
+        type: "datalist",
+        attributes: { type: "number" },
+        defaultDatas: [
+          { current: true, value: job.price.toString() },
+          { description: "Global", value: "0" },
+          { description: "Client - Word Price", value: "0" },
+          { description: "Client - Line Price", value: "0" },
+          { description: "Client - Page Price", value: "0" },
+          { description: "Suggested", value: "0" },
+        ],
+      },
+      count: {
+        title: "Count",
+        attributes: { type: "number" },
+        defaultDatas: [{ current: true, value: job.count.toString() }],
+      },
+      total: {
+        title: "Total",
+        attributes: { type: "number" },
+        defaultDatas: [{ current: true, value: job.total.toString() }],
+      },
+      vat: {
+        title: "Vat",
+        type: "datalist",
+        attributes: { type: "number" },
+        defaultDatas: [
+          { current: true, value: job.vat.toString() },
+          { description: "Global", value: "0.19" },
+          { description: "Client", value: "0.07" },
+          { description: "Suggested", value: "0" },
+        ],
+      },
+      status: {
         title: "Status",
         type: "select",
-        defaultDatas: [
-            { value: "" },
-            ...Object.entries(JobStatus).map(([_key, value]) => ({
-                value: value
-            }))
-        ]
-    });
+        defaultDatas: Object.entries(JobStatus).map(([_key, value]) => ({
+          value: value,
+          current: value === job.status,
+        })),
+      },
+    };
+  },
+  []);
 
-    const handleCreateNewItem = React.useCallback(function (job: Job, newJobData: EditorItemValues) {
-        const clientName = newJobData["clientName"];
-        if (clientName === undefined)
-            throw new Error("Missing clientName in newJobData");
-        const newClient = clientsHandler.get(clientName);
-        if (newClient === undefined)
-            throw new Error(`Client not found (id: ${newJobData["clientId"]})`);
+  const handleCreateDefaultItem = React.useCallback(function () {
+    const fullDate = new Date();
+    const date =
+      fullDate.getFullYear() +
+      "-" +
+      ("0" + (fullDate.getMonth() + 1)).slice(-2) +
+      "-" +
+      ("0" + fullDate.getDate()).slice(-2);
 
-        return {
-            ...job,
-            ...newJobData,
-            clientId: newClient.id
-        };
-    }, []);
+    return {
+      id: 0,
+      clientId: 0,
+      date,
+      description: "",
+      price: 0,
+      count: 1,
+      total: 0,
+      vat: 0,
+      status: JobStatus.InProgress,
+    };
+  }, []);
 
-    const handleMakeItemData = React.useCallback(function (job: Job): EditorItemData {
-        return {
-            clientName: {
-                title: "Client",
-                type: "select",
-                defaultDatas: clientsHandler.getAll().map((client) => ({
-                    current: client.id === job.clientId,
-                    value: client.name
-                }))
-            },
-            date: {
-                title: "Date",
-                inputType: "date",
-                defaultDatas: [
-                    { current: true, value: job.date }
-                ]
-            },
-            description: {
-                title: "Description",
-                type: "textarea",
-                defaultDatas: [
-                    { current: true, value: job.description }
-                ]
-            },
-            price: {
-                title: "Price",
-                type: "datalist",
-                inputType: "number",
-                defaultDatas: [
-                    { current: true, value: job.price.toString() },
-                    { description: "Global", value: "0" },
-                    { description: "Client - Word Price", value: "0" },
-                    { description: "Client - Line Price", value: "0" },
-                    { description: "Client - Page Price", value: "0" },
-                    { description: "Suggested", value: "0" }
-                ]
-            },
-            count: {
-                title: "Count",
-                inputType: "number",
-                defaultDatas: [
-                    { current: true, value: job.count.toString() }
-                ]
-            },
-            total: {
-                title: "Total",
-                inputType: "number",
-                defaultDatas: [
-                    { current: true, value: job.total.toString() }
-                ]
-            },
-            vat: {
-                title: "Vat",
-                type: "datalist",
-                inputType: "number",
-                defaultDatas: [
-                    { current: true, value: job.vat.toString() },
-                    { description: "Global", value: "0.19" },
-                    { description: "Client", value: "0.07" },
-                    { description: "Suggested", value: "0" }
-                ]
-            },
-            status: {
-                title: "Status",
-                type: "select",
-                defaultDatas: Object.entries(JobStatus).map(([_key, value]) => ({
-                    value: value,
-                    current: value === job.status
-                }))
-            }
-        };
-    }, []);
+  if (!clientsHandler.loaded || !jobsHandler.loaded) {
+    return <LoadingSpinner />;
+  }
 
-    const handleCreateDefaultItem = React.useCallback(function () {
-        const fullDate = new Date();
-        const date = fullDate.getFullYear() + "-" + ("0" + (fullDate.getMonth() + 1)).slice(-2) + "-" + ("0" + fullDate.getDate()).slice(-2);
+  let jobs: Job[] = jobsHandler.getAll();
 
-        return {
-            id: 0,
-            clientId: 0,
-            date,
-            description: "",
-            price: 0,
-            count: 1,
-            total: 0,
-            vat: 0,
-            status: JobStatus.InProgress
-        };
-    }, []);
-
-    if (!clientsHandler.loaded || !jobsHandler.loaded) {
-        return <LoadingSpinner />;
-    }
-
-    let jobs: Job[] = jobsHandler.getAll();
-
-    if (filterClientName !== "") {
-        jobs = jobs.filter((job) => clientsHandler.get(job.clientId)?.name.toLowerCase().includes(filterClientName.toLowerCase()));
-    }
-
-    if (filterStatus !== "") {
-        jobs = jobs.filter((job) => job.status === filterStatus);
-    }
-
-    return (
-        <EditableList<Job>
-            className={className}
-
-            items={jobs}
-
-            createNewItem={handleCreateNewItem}
-
-            handler={jobsHandler}
-
-            makeItemData={handleMakeItemData}
-
-            makeListItems={(jobs) => makeListItemsFromJobs(jobs, clientsHandler)}
-
-            createDefaultItem={handleCreateDefaultItem}
-
-            filterEntries={[
-                [filterClientName, setFilterClientName, filterClientNameComponent],
-                [filterStatus, setFilterStatus, filterStatusComponent]
-            ]}
-        />
+  if (filterClientName !== "") {
+    jobs = jobs.filter((job) =>
+      clientsHandler
+        .get(job.clientId)
+        ?.name.toLowerCase()
+        .includes(filterClientName.toLowerCase())
     );
+  }
+
+  if (filterStatus !== "") {
+    jobs = jobs.filter((job) => job.status === filterStatus);
+  }
+
+  return (
+    <EditableList<Job>
+      items={jobs}
+      createNewItem={handleCreateNewItem}
+      handler={jobsHandler}
+      makeItemData={handleMakeItemData}
+      makeListItems={(jobs) => makeListItemsFromJobs(jobs, clientsHandler)}
+      createDefaultItem={handleCreateDefaultItem}
+      filterEntries={[
+        [filterClientName, setFilterClientName, filterClientNameComponent],
+        [filterStatus, setFilterStatus, filterStatusComponent],
+      ]}
+      className={className}
+    />
+  );
 }

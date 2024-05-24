@@ -7,7 +7,7 @@ import { Button } from "../Button/react";
 
 export type Value = string | number;
 
-export type StyledValue = { value: Value, className: string };
+export type StyledValue = { value: Value; className: string };
 
 export type Item = Record<string, Value | StyledValue>;
 
@@ -17,170 +17,179 @@ export type MultiSelection = Array<number>;
 export type Selection = SingleSelection | MultiSelection;
 
 type SelectionProps = {
-    selection: Selection,
-    setSelection?: (newSelectedItems: Selection) => void,
-    singleSelection?: boolean
+  selection: Selection;
+  setSelection?: (newSelectedItems: Selection) => void;
+  singleSelection?: boolean;
 };
 
 type ListProps = {
-    items: Item[],
-    /** return true if item selection should change as result of click*/
-    onClickItem?: (itemId: number) => boolean | void,
-    filterEntries?: [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element][],
-    className?: string
+  items: Item[];
+  /** return true if item selection should change as result of click*/
+  onClickItem?: (itemId: number) => boolean | void;
+  filterEntries?: [
+    string,
+    React.Dispatch<React.SetStateAction<string>>,
+    JSX.Element
+  ][];
+  className?: string;
 } & Partial<SelectionProps>;
 
 type ItemProps = {
-    item: Item,
-    onClick?: () => void,
-    selected?: boolean,
-    className?: string
+  item: Item;
+  onClick?: () => void;
+  selected?: boolean;
+  className?: string;
 };
 
 type FilterProps = {
-    entries: [string, React.Dispatch<React.SetStateAction<string>>, JSX.Element][],
-}
+  entries: [
+    string,
+    React.Dispatch<React.SetStateAction<string>>,
+    JSX.Element
+  ][];
+};
 
 export function List({
-    items,
-    onClickItem,
-    selection,
-    setSelection,
-    filterEntries,
-    className
+  items,
+  onClickItem,
+  selection,
+  setSelection,
+  filterEntries,
+  className,
 }: ListProps) {
+  const singleSelection = !Array.isArray(selection);
 
-    const singleSelection = !Array.isArray(selection);
+  const handleSelect = React.useCallback(
+    function (indexInItems: number) {
+      if (setSelection === undefined) return;
 
-    const handleSelect = React.useCallback(function (indexInItems: number) {
-        if (setSelection === undefined)
-            return;
-
-        if (singleSelection) {
-            if (selection === indexInItems) {
-                setSelection(null);
-            } else {
-                setSelection(indexInItems);
-            } return;
-        }
-
-        const newSelection = [...selection];
-        const indexInSelection = newSelection.findIndex(value => value === indexInItems);
-        if (indexInSelection !== -1) {
-            console.log("removing", indexInSelection);
-            newSelection.splice(indexInSelection, 1);
+      if (singleSelection) {
+        if (selection === indexInItems) {
+          setSelection(null);
         } else {
-            console.log("adding", indexInItems);
-            newSelection.push(indexInItems);
+          setSelection(indexInItems);
         }
-        setSelection(newSelection);
-    }, [singleSelection, selection, setSelection]);
+        return;
+      }
 
-    const handleClickItem = React.useCallback(function (indexInItems: number) {
-        if (onClickItem?.(indexInItems) === true) {
-            if (setSelection) {
-                handleSelect(indexInItems);
-            }
+      const newSelection = [...selection];
+      const indexInSelection = newSelection.findIndex(
+        (value) => value === indexInItems
+      );
+      if (indexInSelection !== -1) {
+        console.log("removing", indexInSelection);
+        newSelection.splice(indexInSelection, 1);
+      } else {
+        console.log("adding", indexInItems);
+        newSelection.push(indexInItems);
+      }
+      setSelection(newSelection);
+    },
+    [singleSelection, selection, setSelection]
+  );
+
+  const handleClickItem = React.useCallback(
+    function (indexInItems: number) {
+      if (onClickItem?.(indexInItems) === true) {
+        if (setSelection) {
+          handleSelect(indexInItems);
         }
-    }, [onClickItem, setSelection, handleSelect]);
+      }
+    },
+    [onClickItem, setSelection, handleSelect]
+  );
 
-    return (
-        <div
-            className={twMerge(
-                "w-11/12 m-2 p-2 flex flex-col gap-4 rounded bg-slate-200 shadow shadow-slate-500 transition duration-300",
-                className
-            )}
-        >
-            {filterEntries && <Filter entries={filterEntries} />}
+  return (
+    <div
+      className={twMerge(
+        "w-11/12 m-2 p-2 flex flex-col gap-4 rounded bg-slate-200 shadow shadow-slate-500 transition duration-300",
+        className
+      )}
+    >
+      {filterEntries && <Filter entries={filterEntries} />}
 
-            {items.map((item, index) =>
-                <Item
-                    key={(typeof item["id"] === "object" ? item["id"].value : item["id"]) ?? index}
-                    item={item}
-                    onClick={() => handleClickItem(index)}
-                    selected={(
-                        singleSelection
-                            ? selection === index
-                            : selection.includes(index)
-                    ) ? true : false}
-                />
-            )}
-        </div>
-    );
+      {items.map((item, index) => (
+        <Item
+          key={
+            (typeof item["id"] === "object" ? item["id"].value : item["id"]) ??
+            index
+          }
+          item={item}
+          onClick={() => handleClickItem(index)}
+          selected={
+            (singleSelection ? selection === index : selection.includes(index))
+              ? true
+              : false
+          }
+        />
+      ))}
+    </div>
+  );
 }
 
-function Item({
-    item,
-    onClick,
-    selected,
-    className
-}: ItemProps) {
-
-    const children = Object.entries(item).filter(([key, _value]) => key !== "id").map(([key, value]) => {
-        const className = typeof value === "object" ? value["className"] : "";
-        const content = typeof value === "object" ? value["value"] : value;
-        const child = (
-            <p
-                className={twMerge(
-                    "flex-1",
-                    className
-                )}
-                key={key}
-            >{content}</p>
-        );
-        return child;
+function Item({ item, onClick, selected, className }: ItemProps) {
+  const children = Object.entries(item)
+    .filter(([key, _value]) => key !== "id")
+    .map(([key, value]) => {
+      const className = typeof value === "object" ? value["className"] : "";
+      const content = typeof value === "object" ? value["value"] : value;
+      const child = (
+        <p
+          key={key}
+          className={twMerge("flex-1", className)}
+        >
+          {content}
+        </p>
+      );
+      return child;
     });
 
-    return (
-        <div
-            className={twMerge(
-                "m-2 p-2 flex flex-row space-between items-center gap-4 rounded bg-slate-100 shadow shadow-slate-600 transition duration-300 hover:bg-slate-300 active:bg-slate-200",
-                selected && "bg-slate-300 hover:bg-slate-200 active:bg-slate-100",
-                onClick && "cursor-pointer",
-                className
-            )}
-            onClick={onClick}
-        >
-            {children}
-        </div>
-    );
+  return (
+    <div
+      onClick={onClick}
+      className={twMerge(
+        "m-2 p-2 flex flex-row space-between items-center gap-4 rounded bg-slate-100 shadow shadow-slate-600 transition duration-300 hover:bg-slate-300 active:bg-slate-200",
+        selected && "bg-slate-300 hover:bg-slate-200 active:bg-slate-100",
+        onClick && "cursor-pointer",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
-function Filter({
-    entries
-}: FilterProps): JSX.Element {
-    const [visible, setVisible] = React.useState(false);
+function Filter({ entries }: FilterProps): JSX.Element {
+  const [visible, setVisible] = React.useState(false);
 
-    if (!visible) {
-        return (
-            <div>
-                <Button
-                    title="Filter"
-                    onClick={() => setVisible(true)}
-                />
-            </div>
-        );
-    }
-
+  if (!visible) {
     return (
-        <div>
-            <div>
-                {entries.map(entry => entry[2])}
-            </div>
-            <div>
-                <Button
-                    title="Clear"
-                    onClick={() => {
-                        for (const entry of entries) {
-                            entry[1]("");
-                        }
-                    }}
-                />
-                <Button
-                    title="Close"
-                    onClick={() => setVisible(false)}
-                />
-            </div>
-        </div>
+      <div>
+        <Button
+          title="Filter"
+          onClick={() => setVisible(true)}
+        />
+      </div>
     );
+  }
+
+  return (
+    <div>
+      <div>{entries.map((entry) => entry[2])}</div>
+      <div>
+        <Button
+          title="Clear"
+          onClick={() => {
+            for (const entry of entries) {
+              entry[1]("");
+            }
+          }}
+        />
+        <Button
+          title="Close"
+          onClick={() => setVisible(false)}
+        />
+      </div>
+    </div>
+  );
 }
