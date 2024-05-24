@@ -94,6 +94,8 @@ function InvoiceCreator({
 
     const filteredJobsItems: ListItem[] = makeListItemsFromJobs(filteredJobs, clientsHandler);
 
+    const disabled = selectedClient === null || selectedJobsIds.length === 0;
+
     return (
         <div
             className={twMerge(
@@ -159,6 +161,7 @@ function InvoiceCreator({
 
                     console.debug(`Creating an invoice for client ${selectedClientName} from jobs ${jobsString}`);
                 }}
+                attributes={{ disabled }}
             />
         </div>
     );
