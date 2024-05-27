@@ -13,7 +13,7 @@ import { twMerge } from "tailwind-merge";
 
 import type { Job } from "../../../components/Jobs/store";
 import type { Client } from "../../../components/Clients/store";
-import type { Item as ListItem } from "../List/react";
+import type { SummaryDataWithAttrs as ListItem } from "../List/react";
 import type {
   ItemValues as EditorItemValues,
   ItemData as DataEntryItemData,
@@ -64,7 +64,7 @@ export function EditableList<Type extends Job | Client>({
 }: EditableListProps<Type>): JSX.Element {
   const [itemToEdit, setItemToEdit] = React.useState<Type | null>(null);
 
-  const handleClickItem = React.useCallback(function (itemId: number) {
+  const handleClick = React.useCallback(function (itemId: number) {
     const item = handler.get(itemId) as Type | undefined;
     if (item !== undefined) {
       setItemToEdit(item);
@@ -103,8 +103,8 @@ export function EditableList<Type extends Job | Client>({
       )}
 
       <List
-        items={listItems}
-        onClickItem={handleClickItem}
+        summaries={listItems}
+        onClick={handleClick}
         {...(filterEntries ? { filterEntries } : {})}
       />
 

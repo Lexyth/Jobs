@@ -1,10 +1,15 @@
-import type { Job } from "./store.js";
-import type { Item as ListItem } from "../../utils/components/List/react";
+import { ClientsHandler } from "../Clients/clientsHandler.js";
+import { SummaryDataWithAttrs } from "../../utils/components/List/react.js";
 
-export function makeListItemsFromJobs(jobs: Job[], clientsHandler: any) {
-  const items: ListItem[] = jobs.map((job) => {
+import type { Job } from "./store.js";
+
+export function makeListItemsFromJobs(
+  jobs: Job[],
+  clientsHandler: ClientsHandler
+): SummaryDataWithAttrs[] {
+  const summaries: SummaryDataWithAttrs[] = jobs.map((job) => {
     const client = clientsHandler.get(job.clientId);
-    if (client === undefined)
+    if (client === undefined) {
       throw new Error(
         "Could not find client with id " +
           job.clientId +
@@ -13,18 +18,18 @@ export function makeListItemsFromJobs(jobs: Job[], clientsHandler: any) {
           " in " +
           JSON.stringify(clientsHandler.getAll())
       );
+    }
 
-    const item: ListItem = {
-      id: job.id,
+    const summary: SummaryDataWithAttrs = {
       client: client.name,
-      date: { value: job.date, className: "whitespace-nowrap" },
-      description: { value: job.description, className: "basis-1/3" },
-      total: job.total,
-      status: { value: job.status, className: "whitespace-nowrap" },
+      date: job.date,
+      description: job.description,
+      total: job.total.toString(),
+      status: job.status,
     };
 
-    return item;
+    return summary;
   });
 
-  return items;
+  return summaries;
 }
