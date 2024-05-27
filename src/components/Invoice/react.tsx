@@ -256,7 +256,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
             `Creating an invoice for client ${selectedClientName} from jobs ${jobsString}`
           );
         }}
-        attributes={{ disabled }}
+        attrs={{ disabled }}
       />
     </div>
   );
