@@ -24,7 +24,7 @@ export function makeListItemsFromJobs(
       client: client.name,
       date: job.date,
       description: job.description,
-      total: job.total.toString(),
+      gross: job.gross.toString(),
       status: job.status,
     };
 

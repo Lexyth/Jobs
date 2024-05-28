@@ -1,4 +1,4 @@
-import { jobsStore } from "./store";
+import { store } from "./store";
 
 import type { Job } from "./store";
 
@@ -14,51 +14,51 @@ export class JobsHandler {
   }
 
   get loaded(): boolean {
-    return jobsStore.loaded;
+    return store.loaded;
   }
 
   add(job: Job): number {
     job.id =
-      jobsStore.get().reduce((id, job) => (job.id > id ? job.id : id), 0) + 1;
-    const newJobs = [...jobsStore.get(), { ...job }];
-    jobsStore.set(newJobs);
+      store.get().reduce((id, job) => (job.id > id ? job.id : id), 0) + 1;
+    const newJobs = [...store.get(), { ...job }];
+    store.set(newJobs);
     return job.id;
   }
 
   remove(job: Job | number): boolean {
     let newJobs;
     if (job instanceof Object) {
-      newJobs = jobsStore.get().filter((oldJob) => oldJob.id !== job.id);
+      newJobs = store.get().filter((oldJob) => oldJob.id !== job.id);
     } else {
-      newJobs = jobsStore.get().filter((oldJob) => oldJob.id !== job);
+      newJobs = store.get().filter((oldJob) => oldJob.id !== job);
     }
-    jobsStore.set(newJobs);
-    return newJobs.length !== jobsStore.get().length;
+    store.set(newJobs);
+    return newJobs.length !== store.get().length;
   }
 
   set(job: Job): boolean {
-    const index = jobsStore.get().findIndex((oldJob) => oldJob.id === job.id);
+    const index = store.get().findIndex((oldJob) => oldJob.id === job.id);
 
     if (index === -1) {
       return false;
     } else {
-      jobsStore.set([
-        ...jobsStore.get().slice(0, index),
+      store.set([
+        ...store.get().slice(0, index),
         { ...job },
-        ...jobsStore.get().slice(index + 1),
+        ...store.get().slice(index + 1),
       ]);
       return true;
     }
   }
 
   get(id: number): Job | void {
-    let job = jobsStore.get().find((job) => job.id === id);
+    const job = store.get().find((job) => job.id === id);
 
     if (job === undefined) return;
     return { ...job };
   }
 
   getAll(): Job[] {
-    return [...jobsStore.get()];
+    return [...store.get()];
   }
 }
