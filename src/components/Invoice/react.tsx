@@ -23,52 +23,75 @@ import type { SummaryDataWithAttrs } from "../../utils/components/List/react";
 
 // TODO?: add a list of all the past invoices, including a way to re-"print" them
 
-// TODO: only show any jobs when a client is selected. We need a client to create an invoice, not just a list of jobs. Also, remove the filter for jobs by client name, since they'll all be by the same client.
-
-// TODO: select all jobs button
-
 // TODO!: create an invoice entry, from which one can generate the pdf or click on it to overwrite all parameters (showing the original next to it)
 
 // TODO!: All data in an Invoice entry must be editable.
 
-/* Invoice needs following data:
- *
- * From User:
- * UST-ID-Nr.
- * Steuer-Nr.
+type AddressData = {
+  // TODO: use actual values instead of these dummy values
+  name: string;
+  company: string;
+  address: string;
+  zip: string;
+  city: string;
+  country: string;
+};
 
- * From Invoice (changes with each invoice):
- * Datum
- * Rechnungs-Nr.
+type JobData = {
+  // From Item:
+  Ausgeführt: string;
+  "Artikel-Nr.": string;
+  "Artikel-Bez.": string;
+  Beschreibung: string;
+  Anzahl: string;
+  Preis: string;
+  "MwSt. %": string; // TODO?: consider displaying it as: 'X.XX€ (Y %)'
+  Netto: string;
+  Brutto: string;
+};
 
- * From Client:
- * Rechnung an
- * Versand an
- * 
- * UST-ID-Nr. Kunde
- * Bestell-Nr.
- * Zahlungsbedingungen
- * Liefer-Nr. Kunde
- * Kunden-Nr.
- * ? Abrechnung vom
+type RechnungsAddressData = {
+  [key in keyof AddressData as `r_${key}`]: AddressData[key];
+};
 
- * From Item:
- * Position
- * Ausgeführt
- * Artikel-Nr.
- * Artikel-Bez.
- * Beschreibung
- * Anzahl 
- * Preis
- * MwSt. %
- * MwSt. (consider displaying it as: X.XX€ (Y %))
- * Netto Summe
- * Brutto Summe
- 
- * Netto Summe
- * MwSt. Summe
- * Brutto Summe
-*/
+type VersandAddressData = {
+  [key in keyof AddressData as `v_${key}`]: AddressData[key];
+};
+
+type ClientData = {
+  "UST-ID-Nr. Kunde": string;
+  "Bestell-Nr.": string;
+  Zahlungsbedingungen: string;
+  "Liefer-Nr. Kunde": string;
+  "Kunden-Nr.": string;
+} & RechnungsAddressData &
+  VersandAddressData;
+
+type InvoiceData = {
+  Datum: string;
+  "Rechnungs-Nr.": string;
+  "Abrechnung vom": string; // TODO?: is this necessary?
+};
+
+type UserData = {
+  "UST-ID-Nr.": string;
+  "Steuer-Nr.": string;
+};
+
+export type Invoice = UserData &
+  ClientData &
+  InvoiceData & {
+    jobDataList: JobData[];
+  } & {
+    "Netto Summe": string;
+    "MwSt. Summe": string;
+    "Brutto Summe": string;
+  };
+
+export type InvoiceOrigin = {
+  client: Client;
+  jobList: Job[];
+};
 
 type InvoiceProps = {
   className?: string;
@@ -215,17 +238,37 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
       />
 
       <Button
-        title="Create Invoice"
+        title={`Create Invoice for ${
+          selectedJobs.length === 0 ? " all " : `(${selectedJobs.length}) `
+        } Jobs`}
         onClick={() => {
-          const selectedClientName = `${selectedClient?.name}(#${selectedClient?.id})`;
-          const selectedJobs = filteredJobs.filter((job) =>
-            selectedJobsIds.includes(job.id)
+          const selectedClientName_Fancy = `${selectedClient?.name}(#${selectedClient?.id})`;
+          const jobsString = JSON.stringify(
+            selectedJobs.length === 0 ? filteredJobs : selectedJobs
           );
-          const jobsString = JSON.stringify(selectedJobs);
 
           console.debug(
-            `Creating an invoice for client ${selectedClientName} from jobs ${jobsString}`
+            `Creating an invoice for client ${selectedClientName_Fancy} from jobs ${jobsString}`
           );
+
+          if (selectedClient === null) {
+            throw new Error(
+              "No client selected. Button should not have been pressable."
+            );
+          }
+
+          if (selectedJobs.length === 0) {
+            throw new Error(
+              "No jobs selected. Button should not have been pressable."
+            );
+          }
+
+          const Invoice: Invoice = createInvoice({
+            client: selectedClient,
+            jobList: selectedJobs,
+          });
+
+          console.debug(`Invoice: ${JSON.stringify(Invoice)}`);
         }}
         attrs={{ disabled }}
       />
