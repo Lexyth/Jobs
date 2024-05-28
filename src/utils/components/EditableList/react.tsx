@@ -6,13 +6,12 @@ import { Editor } from "../Editor/react";
 import { Button } from "../Button/react";
 import { LoadingSpinner } from "../LoadingSpinner/react";
 
-import { JobsHandler } from "../../../components/Jobs/jobsHandler";
-import { ClientsHandler } from "../../../components/Clients/clientsHandler";
-
 import { twMerge } from "tailwind-merge";
 
 import type { Job } from "../../../components/Jobs/store";
 import type { Client } from "../../../components/Clients/store";
+import type { JobsHandler } from "../../../components/Jobs/jobsHandler";
+import type { ClientsHandler } from "../../../components/Clients/clientsHandler";
 import type { SummaryDataWithAttrs as ListItem } from "../List/react";
 import type {
   ItemValues as EditorItemValues,
@@ -21,14 +20,17 @@ import type {
 
 // TODO: remove undefined from className prop; it's only used for when className is set conditionally, but that should be handeled using spreading {...(condition && { className })}
 
-type EditableListProps<Type extends Job | Client> = {
+type Item = Job | Client;
+type Handler<Type extends Item> = Type extends Job
+  ? JobsHandler
+  : Type extends Client
+  ? ClientsHandler
+  : never;
+
+type EditableListProps<Type extends Item> = {
   items: Type[];
   createNewItem: (item: Type, itemData: EditorItemValues) => Type;
-  handler: Type extends Job
-    ? JobsHandler
-    : Type extends Client
-    ? ClientsHandler
-    : never;
+  handler: Handler<Type>;
   makeItemData: (item: Type) => DataEntryItemData;
   makeListItems: (items: Type[]) => ListItem[];
   createDefaultItem: () => Type;
@@ -40,19 +42,15 @@ type EditableListProps<Type extends Job | Client> = {
   className?: string | undefined;
 };
 
-type ItemEditorProps<Type extends Job | Client> = {
+type ItemEditorProps<Type extends Item> = {
   item: Type;
   onCancel: () => void;
   createNewItem: (item: Type, itemData: EditorItemValues) => Type;
-  handler: Type extends Job
-    ? JobsHandler
-    : Type extends Client
-    ? ClientsHandler
-    : never;
+  handler: Handler<Type>;
   makeItemData: (item: Type) => DataEntryItemData;
 };
 
-export function EditableList<Type extends Job | Client>({
+export function EditableList<Type extends Item>({
   items,
   createNewItem,
   handler,
@@ -116,7 +114,7 @@ export function EditableList<Type extends Job | Client>({
   );
 }
 
-function ItemEditor<Type extends Job | Client>({
+function ItemEditor<Type extends Item>({
   item,
   onCancel,
   createNewItem,
