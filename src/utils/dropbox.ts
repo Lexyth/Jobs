@@ -99,9 +99,13 @@ let dropbox: Dropbox.Dropbox;
   ) {
     const promise = dbxAuth
       .getAccessTokenFromCode(REDIRECT_URI, code)
-      .then((response: any) => {
-        const accessToken = response.result.access_token;
-        const refreshToken = response.result.refresh_token;
+      .then((response) => {
+        const result = response.result as {
+          access_token: string;
+          refresh_token: string;
+        };
+        const accessToken = result.access_token;
+        const refreshToken = result.refresh_token;
         return {
           accessToken,
           refreshToken,
@@ -131,7 +135,7 @@ let dropbox: Dropbox.Dropbox;
     dbxAuth.refreshAccessToken();
   }
 
-  function accessDropbox(dbxAuth: Dropbox.DropboxAuth, accessToken: any) {
+  function accessDropbox(dbxAuth: Dropbox.DropboxAuth, accessToken: string) {
     dbxAuth.setAccessToken(accessToken);
     dropbox = new Dropbox.Dropbox({
       auth: dbxAuth,
@@ -142,12 +146,12 @@ let dropbox: Dropbox.Dropbox;
   function auth() {
     console.log("Authenticating for Dropbox API");
 
-    var REDIRECT_URI = window.location.href.split("?")[0];
+    const REDIRECT_URI = window.location.href.split("?")[0];
     if (REDIRECT_URI === undefined)
       throw new Error("REDIRECT_URI is undefined");
-    var CLIENT_ID = "43pkecavqfklasz";
+    const CLIENT_ID = "43pkecavqfklasz";
 
-    var dbxAuth = new Dropbox.DropboxAuth({
+    const dbxAuth = new Dropbox.DropboxAuth({
       clientId: CLIENT_ID,
     });
 
@@ -195,12 +199,12 @@ function download(
       response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>
     ): File {
       console.log("Downloaded from Dropbox:", response);
-      const fileMetadata = response.result;
-      const file: File = new File(
-        [(<any>fileMetadata).fileBlob],
-        fileMetadata.name,
-        { type }
-      );
+      const fileMetadata = response.result as Dropbox.files.FileMetadata & {
+        fileBlob: Blob;
+      };
+      const file: File = new File([fileMetadata.fileBlob], fileMetadata.name, {
+        type,
+      });
       return file;
     },
     function (

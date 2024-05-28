@@ -63,7 +63,7 @@ export function useSelection(
         }
       }
     },
-    [onSelectionChange, selection]
+    [onSelectionChange, singleSelection, selection]
   );
 
   summaryDatas.forEach((summaryData, index) => {
@@ -96,7 +96,7 @@ export function useFilter<Item>(
 } {
   const filterComponent = <Filter entries={entries} />;
 
-  let filteredItems: Item[] = items.filter((item) =>
+  const filteredItems: Item[] = items.filter((item) =>
     entries.every((filterEntry) => filterEntry.test(item))
   );
 

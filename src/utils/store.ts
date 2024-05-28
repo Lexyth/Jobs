@@ -121,7 +121,7 @@ export function createPersistentCSVStore<Type>(
 
     const csvArray = csvText.split("\n");
 
-    let result: Type[] = [];
+    const result: Type[] = [];
 
     for (let i = 0; i < csvArray.length; i++) {
       const csv = csvArray[i];

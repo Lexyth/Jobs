@@ -41,7 +41,7 @@ export function Editor({
   const itemDataEntries: DataEntries = {};
   for (const [key, dataEntryData] of Object.entries(itemData)) {
     //eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, _setValue, dataEntry] = useDataEntry({
+    const [value, , dataEntry] = useDataEntry({
       ...dataEntryData,
     });
 
@@ -99,7 +99,7 @@ function DeleteModal({
 }: DeleteModalProps): JSX.Element {
   const hideModal = React.useCallback(() => {
     setShowDeleteModal(false);
-  }, []);
+  }, [setShowDeleteModal]);
 
   return (
     <Modal onClickOutside={hideModal}>

@@ -30,6 +30,8 @@ export type DataEntryProps = {
   className?: string;
 } & EntryTypeProps;
 
+// TODO!: rename to Entry
+
 export function DataEntry({
   title,
   type = "input",
@@ -101,7 +103,7 @@ export function DataEntry({
       );
       break;
 
-    case "datalist":
+    case "datalist": {
       const datalistId = `datalist-${id}`;
       element = (
         <>
@@ -121,6 +123,7 @@ export function DataEntry({
         </>
       );
       break;
+    }
 
     default:
       element = (
