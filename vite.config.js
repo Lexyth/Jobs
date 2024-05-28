@@ -15,7 +15,7 @@ export default defineConfig({
     eslint({
       cache: false,
       failOnError: true,
-      failOnWarning: false,
+      failOnWarning: true,
       include: ["src/**/*.ts", "src/**/*.tsx", "../**/*.ts", "../**/*.tsx"],
     }),
   ],

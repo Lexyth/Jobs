@@ -1,3 +1,4 @@
+//useless for now. Keep for ESLint@9.0.0 support once others support it too...
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
