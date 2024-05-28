@@ -62,20 +62,26 @@ export function EditableList<Type extends Item>({
 }: EditableListProps<Type>): JSX.Element {
   const [itemToEdit, setItemToEdit] = React.useState<Type | null>(null);
 
-  const handleClick = React.useCallback(function (itemId: number) {
-    const item = handler.get(itemId) as Type | undefined;
-    if (item !== undefined) {
+  const handleClick = React.useCallback(
+    function (index: number) {
+      const item = items[index];
+      if (item === undefined) {
+        throw new Error(
+          `No item at index ${index} in list of length ${items.length}.`
+        );
+      }
       setItemToEdit(item);
-    }
-  }, []);
+    },
+    [items]
+  );
 
-  const handleAddNewItem = React.useCallback(function () {
-    const newItem: Type = createDefaultItem();
-
-    handler.add(newItem as Job & Client);
-
-    setItemToEdit(newItem);
-  }, []);
+  const handleEditNewItem = React.useCallback(
+    function () {
+      const newItem: Type = createDefaultItem();
+      setItemToEdit(newItem);
+    },
+    [createDefaultItem]
+  );
 
   if (!handler.loaded) {
     return <LoadingSpinner />;
@@ -108,7 +114,7 @@ export function EditableList<Type extends Item>({
 
       <Button
         title={`Add`}
-        onClick={handleAddNewItem}
+        onClick={handleEditNewItem}
       />
     </div>
   );
@@ -129,9 +135,12 @@ function ItemEditor<Type extends Item>({
 
       const newItem = createNewItem(item, newItemData);
 
-      handler.set(newItem as Job & Client);
+      console.log(newItem);
+      if (!handler.set(newItem as Job & Client)) {
+        handler.add(newItem as Job & Client);
+      }
     },
-    [handler, item]
+    [onCancel, item, createNewItem, handler]
   );
 
   const handleDeleteItem = React.useCallback(
@@ -140,7 +149,7 @@ function ItemEditor<Type extends Item>({
 
       if (item) handler.remove(item as Job & Client);
     },
-    [handler, item]
+    [onCancel, item, handler]
   );
 
   const itemData: DataEntryItemData = makeItemData(item);
