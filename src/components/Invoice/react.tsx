@@ -1,25 +1,25 @@
 import React from "react";
 
-import {
-  List,
-  type Item as ListItem,
-  type SingleSelection as ListSingleSelection,
-  type MultiSelection as ListMultiSelection,
-} from "../../utils/components/List/react";
+import { List } from "../../utils/components/List/react";
 import { Button } from "../../utils/components/Button/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { Modal } from "../../utils/components/Modal/react";
 
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "../Jobs/hook";
+import { useDataEntry } from "../../utils/components/DataEntry/hook";
+import { useFilter, useSelection } from "../../utils/components/List/hooks";
 
 import { makeListItemsFromJobs } from "../Jobs/script";
 import { makeListItemsFromClients } from "../Clients/script";
-
-import { JobStatus } from "../Jobs/store";
+import { createInvoice } from "./script";
 
 import { twMerge } from "tailwind-merge";
-import { useDataEntry } from "../../utils/components/DataEntry/hook";
+
+import { Status } from "../Jobs/store";
+import type { Job } from "../Jobs/store";
+import type { Client } from "../Clients/store";
+import type { SummaryDataWithAttrs } from "../../utils/components/List/react";
 
 // TODO?: add a list of all the past invoices, including a way to re-"print" them
 
@@ -79,22 +79,25 @@ export function Invoice({ className }: InvoiceProps): JSX.Element {
 
   return (
     <div className={className}>
-      {false ? (
-        <>
-          {showCreator && (
-            <Modal onClickOutside={() => setShowCreator(false)}>
-              <InvoiceCreator />
-            </Modal>
-          )}
+      {
+        // eslint-disable-next-line no-constant-condition
+        false ? (
+          <>
+            {showCreator && (
+              <Modal onClickOutside={() => setShowCreator(false)}>
+                <InvoiceCreator />
+              </Modal>
+            )}
 
-          <Button
-            title="Create"
-            onClick={() => setShowCreator(!showCreator)}
-          />
-        </>
-      ) : (
-        <InvoiceCreator />
-      )}
+            <Button
+              title="Create"
+              onClick={() => setShowCreator(!showCreator)}
+            />
+          </>
+        ) : (
+          <InvoiceCreator />
+        )
+      }
     </div>
   );
 }
@@ -103,75 +106,87 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   const clientsHandler = useClientsHandler();
   const jobsHandler = useJobsHandler();
 
-  const [selectedClientId, setSelectedClientId] =
-    React.useState<ListSingleSelection>(null);
-  const [selectedJobsIds, setSelectedJobsIds] =
-    React.useState<ListMultiSelection>([]);
-
-  const [
-    clientsFilterClientName,
-    setClientsFilterClientName,
-    clientsFilterClientNameComponent,
-  ] = useDataEntry({
+  const clientNameFilterEntry = useDataEntry({
     title: "Client Name",
   });
 
-  const [
-    jobsFilterClientName,
-    setJobsFilterClientName,
-    jobsFilterClientNameComponent,
-  ] = useDataEntry({
-    title: "Client Name",
+  const clients = clientsHandler.loaded ? clientsHandler.getAll() : [];
+
+  const { filteredItems: filteredClients, component: clientsFilterComponent } =
+    useFilter(clients, [
+      {
+        get: clientNameFilterEntry[0],
+        set: clientNameFilterEntry[1],
+        component: clientNameFilterEntry[2],
+        test: (client) =>
+          clientNameFilterEntry[0] === "" ||
+          client.name
+            .toLowerCase()
+            .includes(clientNameFilterEntry[0].toLowerCase()),
+      },
+    ]);
+
+  const clientItems: SummaryDataWithAttrs[] =
+    makeListItemsFromClients(filteredClients);
+
+  const {
+    selection: [selectedClientIndex_],
+    handleSelect: handleSelectClient,
+  }: { selection: (number | null)[]; handleSelect: (index: number) => void } =
+    useSelection(clientItems, null);
+  const selectedClientIndex = selectedClientIndex_ ?? null;
+
+  const selectedClient: Client | null =
+    (selectedClientIndex === null
+      ? null
+      : filteredClients[selectedClientIndex]) ?? null;
+
+  const filteredJobs: Job[] = jobsHandler.loaded
+    ? jobsHandler
+        .getAll()
+        .filter(
+          (job) =>
+            (selectedClient ? selectedClient.id === job.clientId : true) &&
+            job.status === Status.InvoicePending
+        )
+    : [];
+
+  const filteredJobsItems: SummaryDataWithAttrs[] = clientsHandler.loaded
+    ? makeListItemsFromJobs(filteredJobs, clientsHandler)
+    : [];
+
+  const {
+    selection: selectedJobsIndexes,
+    setSelection: setSelectedJobsIndexes,
+    handleSelect: handleSelectJob,
+  } = useSelection(filteredJobsItems, []);
+
+  const selectedJobs: Job[] = selectedJobsIndexes.map((index) => {
+    const job: Job | undefined = filteredJobs[index];
+    if (!job) {
+      throw new Error("Job at index " + index + " was undefined.");
+    }
+    return job;
   });
 
   if (!clientsHandler.loaded || !jobsHandler.loaded) {
     return <LoadingSpinner />;
   }
 
-  let clients = clientsHandler.getAll();
-  const selectedClient =
-    selectedClientId === null ? null : clientsHandler.get(selectedClientId);
-  const clientSelected =
-    selectedClient !== null && selectedClient !== undefined;
+  const disabled: boolean =
+    selectedClient === null || filteredJobs.length === 0;
 
-  if (clientsFilterClientName !== "") {
-    clients = clients.filter(
-      (client) =>
-        client.name
-          .toLowerCase()
-          .includes(clientsFilterClientName.toLowerCase()) ||
-        client.id === selectedClient?.id
-    );
+  if (disabled) {
+    filteredJobsItems.forEach((summaryData) => {
+      if (!summaryData._attrs) {
+        summaryData._attrs = {};
+      }
+      summaryData._attrs.className = twMerge(
+        "text-gray-400",
+        summaryData._attrs.className
+      );
+    });
   }
-
-  const jobs = jobsHandler.getAll();
-  let filteredJobs = jobs.filter(
-    (job) =>
-      job.status === JobStatus.InvoicePending &&
-      (!clientSelected ||
-        selectedClient.id === job.clientId ||
-        selectedJobsIds.includes(job.id))
-  );
-
-  if (jobsFilterClientName !== "") {
-    filteredJobs = filteredJobs.filter(
-      (job) =>
-        clientsHandler
-          .get(job.clientId)
-          ?.name.toLowerCase()
-          .includes(jobsFilterClientName.toLowerCase()) ||
-        selectedJobsIds.includes(job.id)
-    );
-  }
-
-  const clientItems: ListItem[] = makeListItemsFromClients(clients);
-
-  const filteredJobsItems: ListItem[] = makeListItemsFromJobs(
-    filteredJobs,
-    clientsHandler
-  );
-
-  const disabled = selectedClient === null || selectedJobsIds.length === 0;
 
   return (
     <div
@@ -182,65 +197,21 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     >
       <h2 className="text-xl font-semibold">Clients</h2>
 
+      {clientsFilterComponent}
+
       <List
-        items={clientItems}
-        onClickItem={() => true}
-        selection={clients.findIndex(
-          (client) => client.id === selectedClientId
-        )}
-        setSelection={(clientIndex) => {
-          if (Array.isArray(clientIndex))
-            throw new Error("Expected single selection");
-          const client = clientIndex === null ? null : clients[clientIndex];
-          setSelectedClientId(client?.id ?? null);
+        summaries={clientItems}
+        onClick={(index) => {
+          handleSelectClient(index);
+          setSelectedJobsIndexes([]);
         }}
-        filterEntries={[
-          [
-            clientsFilterClientName,
-            setClientsFilterClientName,
-            clientsFilterClientNameComponent,
-          ],
-        ]}
       />
 
       <h2 className="text-xl font-semibold">Jobs</h2>
 
       <List
-        items={filteredJobsItems}
-        onClickItem={() => true}
-        selection={filteredJobs
-          .map((_job, index) => index)
-          .filter((jobIndex) => {
-            const jobId = filteredJobs[jobIndex]?.id;
-            if (jobId === undefined) return false;
-            return selectedJobsIds.includes(jobId);
-          })}
-        setSelection={(newSelectedJobsIndexes) => {
-          console.log(newSelectedJobsIndexes);
-          if (Array.isArray(newSelectedJobsIndexes)) {
-            setSelectedJobsIds(
-              newSelectedJobsIndexes
-                .filter((jobIndex) => filteredJobs[jobIndex]?.id !== undefined)
-                .map((jobIndex) => {
-                  const jobId = filteredJobs[jobIndex]?.id;
-                  if (jobId === undefined)
-                    throw new Error(
-                      "Expected id at index " +
-                        jobIndex +
-                        "; instead got undefined"
-                    );
-                  return jobId;
-                })
-            );
-          } else throw new Error("Expected multi selection");
-        }}
-        filterEntries={[
-          [
-            jobsFilterClientName,
-            setJobsFilterClientName,
-            jobsFilterClientNameComponent,
-          ],
-        ]}
+        summaries={filteredJobsItems}
+        onClick={(index) => (disabled ? undefined : handleSelectJob(index))}
       />
 
       <Button
