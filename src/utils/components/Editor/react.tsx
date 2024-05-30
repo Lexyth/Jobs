@@ -3,13 +3,13 @@ import React from "react";
 import { Modal } from "../Modal/react";
 import { Button } from "../Button/react";
 
-import { useDataEntry } from "../DataEntry/hook";
+import { useEntry } from "../Entry/hook";
 
 import { twMerge } from "tailwind-merge";
 
-import type { DataEntryProps } from "../DataEntry/hook";
+import type { EntryProps } from "../Entry/hook";
 
-export type ItemData = Record<string, DataEntryProps>;
+export type ItemData = Record<string, EntryProps>;
 export type ItemValues = Record<string, string>;
 
 type DataEntries = Record<string, JSX.Element>;
@@ -41,7 +41,7 @@ export function Editor({
   const itemDataEntries: DataEntries = {};
   for (const [key, dataEntryData] of Object.entries(itemData)) {
     //eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, , dataEntry] = useDataEntry({
+    const [value, , dataEntry] = useEntry({
       ...dataEntryData,
     });
 

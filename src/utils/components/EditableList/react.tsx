@@ -15,7 +15,7 @@ import type { ClientsHandler } from "../../../components/Clients/clientsHandler"
 import type { SummaryDataWithAttrs as ListItem } from "../List/react";
 import type {
   ItemValues as EditorItemValues,
-  ItemData as DataEntryItemData,
+  ItemData as EntryItemData,
 } from "../Editor/react";
 
 // TODO: remove undefined from className prop; it's only used for when className is set conditionally, but that should be handeled using spreading {...(condition && { className })}
@@ -31,7 +31,7 @@ type EditableListProps<Type extends Item> = {
   items: Type[];
   createNewItem: (item: Type, itemData: EditorItemValues) => Type;
   handler: Handler<Type>;
-  makeItemData: (item: Type) => DataEntryItemData;
+  makeItemData: (item: Type) => EntryItemData;
   makeListItems: (items: Type[]) => ListItem[];
   createDefaultItem: () => Type;
   filterEntries?: [
@@ -47,7 +47,7 @@ type ItemEditorProps<Type extends Item> = {
   onCancel: () => void;
   createNewItem: (item: Type, itemData: EditorItemValues) => Type;
   handler: Handler<Type>;
-  makeItemData: (item: Type) => DataEntryItemData;
+  makeItemData: (item: Type) => EntryItemData;
 };
 
 export function EditableList<Type extends Item>({
@@ -152,7 +152,7 @@ function ItemEditor<Type extends Item>({
     [onCancel, item, handler]
   );
 
-  const itemData: DataEntryItemData = makeItemData(item);
+  const itemData: EntryItemData = makeItemData(item);
 
   return (
     <Modal onClickOutside={onCancel}>

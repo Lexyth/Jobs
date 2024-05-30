@@ -4,7 +4,7 @@ import { EditableList } from "../../utils/components/EditableList/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "./hook";
-import { useDataEntry } from "../../utils/components/DataEntry/hook";
+import { useEntry } from "../../utils/components/Entry/hook";
 
 import { makeListItemsFromClients } from "./script";
 
@@ -15,11 +15,13 @@ type ClientsProps = {
   className?: string;
 };
 
+// TODO: filter also by company and maybe others.
+
 export function Clients({ className }: ClientsProps): JSX.Element {
   const clientsHandler = useClientsHandler();
 
   const [filterClientName, setFilterClientName, filterClientNameComponent] =
-    useDataEntry({
+    useEntry({
       title: "Client Name",
     });
 

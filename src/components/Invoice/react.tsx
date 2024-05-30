@@ -7,7 +7,7 @@ import { Modal } from "../../utils/components/Modal/react";
 
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "../Jobs/hook";
-import { useDataEntry } from "../../utils/components/DataEntry/hook";
+import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useSelection } from "../../utils/components/List/hooks";
 
 import { makeListItemsFromJobs } from "../Jobs/script";
@@ -129,7 +129,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   const clientsHandler = useClientsHandler();
   const jobsHandler = useJobsHandler();
 
-  const clientNameFilterEntry = useDataEntry({
+  const clientNameFilterEntry = useEntry({
     title: "Client Name",
   });
 

@@ -20,7 +20,7 @@ type ValueState = {
   setValue: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export type DataEntryProps = {
+export type EntryProps = {
   title: string;
   defaultDatas?: {
     description?: string;
@@ -30,9 +30,7 @@ export type DataEntryProps = {
   className?: string;
 } & EntryTypeProps;
 
-// TODO!: rename to Entry
-
-export function DataEntry({
+export function Entry({
   title,
   type = "input",
   defaultDatas = [],
@@ -40,7 +38,7 @@ export function DataEntry({
   value,
   setValue,
   className,
-}: DataEntryProps & ValueState) {
+}: EntryProps & ValueState) {
   const id = React.useId();
 
   const options = defaultDatas.map((defaultData) => (

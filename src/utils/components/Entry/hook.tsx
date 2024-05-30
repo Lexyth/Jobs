@@ -1,16 +1,16 @@
 import React from "react";
 
-import { DataEntry } from "./react";
+import { Entry } from "./react";
 
-import type { DataEntryProps } from "./react";
-export type { DataEntryProps };
+import type { EntryProps } from "./react";
+export type { EntryProps as EntryProps };
 
-export function useDataEntry({
+export function useEntry({
   title,
   type = "input",
   defaultDatas = [],
   attributes,
-}: DataEntryProps): [
+}: EntryProps): [
   string,
   React.Dispatch<React.SetStateAction<string>>,
   JSX.Element
@@ -21,7 +21,7 @@ export function useDataEntry({
   );
 
   const component = (
-    <DataEntry
+    <Entry
       key={title}
       title={title}
       type={type}

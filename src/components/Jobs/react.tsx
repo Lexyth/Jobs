@@ -5,7 +5,7 @@ import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "./hook";
-import { useDataEntry } from "../../utils/components/DataEntry/hook";
+import { useEntry } from "../../utils/components/Entry/hook";
 
 import { makeListItemsFromJobs } from "./script";
 
@@ -25,11 +25,11 @@ export function Jobs({ className }: JobsProps): JSX.Element {
   const jobsHandler = useJobsHandler();
 
   const [filterClientName, setFilterClientName, filterClientNameComponent] =
-    useDataEntry({
+    useEntry({
       title: "Client Name",
     });
 
-  const [filterStatus, setFilterStatus, filterStatusComponent] = useDataEntry({
+  const [filterStatus, setFilterStatus, filterStatusComponent] = useEntry({
     title: "Status",
     type: "select",
     defaultDatas: [
