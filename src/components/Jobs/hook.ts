@@ -4,16 +4,9 @@ import { store } from "./store.js";
 
 import { JobsHandler } from "./jobsHandler.js";
 
-// TODO: useJobs should become obsolete and JobsHandler should expose subscribe and getSnapshot methods; maybe get() suffices if JobsHandler can guarantee immutability
-
-export function useJobs() {
-  const jobs = React.useSyncExternalStore(store.subscribe, store.getSnapshot);
-
-  return jobs;
-}
-
 export function useJobsHandler() {
-  useJobs();
+  // tell react to reload when the data in the store changes
+  React.useSyncExternalStore(store.subscribe, store.getSnapshot);
 
   return new JobsHandler();
 }
