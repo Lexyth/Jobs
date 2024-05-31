@@ -4,6 +4,8 @@ import { Button } from "../Button/react";
 
 import { twMerge } from "tailwind-merge";
 
+import type { EntryAccessorAndComponent as Entry } from "../Entry/hook";
+
 export type ValueWithClassName = { value: string; className: string };
 
 /** value | {value, className} */
@@ -27,13 +29,6 @@ export type ListProps = {
   summaries: SummaryDataWithAttrs[];
   onClick?: (summaryIndex: number, summaries: SummaryData[]) => void;
   className?: string;
-};
-
-/** value, setValue, component */
-export type Entry = {
-  get: string;
-  set: React.Dispatch<React.SetStateAction<string>>;
-  component: JSX.Element;
 };
 
 export type FilterProps = {

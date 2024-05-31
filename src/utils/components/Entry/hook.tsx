@@ -3,18 +3,21 @@ import React from "react";
 import { Entry } from "./react";
 
 import type { EntryProps } from "./react";
+
 export type { EntryProps as EntryProps };
+
+export type EntryAccessorAndComponent = {
+  value: string;
+  set: React.Dispatch<React.SetStateAction<string>>;
+  component: JSX.Element;
+};
 
 export function useEntry({
   title,
   type = "input",
   defaultDatas = [],
   attributes,
-}: EntryProps): [
-  string,
-  React.Dispatch<React.SetStateAction<string>>,
-  JSX.Element
-] {
+}: EntryProps): EntryAccessorAndComponent {
   const [value, setValue] = React.useState(
     defaultDatas.find((defaultData) => defaultData.current === true)?.value ??
       ""
@@ -32,5 +35,5 @@ export function useEntry({
     />
   );
 
-  return [value, setValue, component];
+  return { value, set: setValue, component };
 }

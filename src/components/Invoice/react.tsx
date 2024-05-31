@@ -21,14 +21,9 @@ import type { Job } from "../Jobs/store";
 import type { Client } from "../Clients/store";
 import type { SummaryDataWithAttrs } from "../../utils/components/List/react";
 
-// TODO?: add a list of all the past invoices, including a way to re-"print" them
-
-// TODO!: create an invoice entry, from which one can generate the pdf or click on it to overwrite all parameters (showing the original next to it)
-
-// TODO!: All data in an Invoice entry must be editable.
+// TODO!: Add an invoice editor, so that all data in an Invoice entry can be edited.
 
 type AddressData = {
-  // TODO: use actual values instead of these dummy values
   name: string;
   company: string;
   address: string;
@@ -129,23 +124,17 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   const clientsHandler = useClientsHandler();
   const jobsHandler = useJobsHandler();
 
-  const clientNameFilterEntry = useEntry({
-    title: "Client Name",
-  });
-
   const clients = clientsHandler.loaded ? clientsHandler.getAll() : [];
 
   const { filteredItems: filteredClients, component: clientsFilterComponent } =
     useFilter(clients, [
       {
-        get: clientNameFilterEntry[0],
-        set: clientNameFilterEntry[1],
-        component: clientNameFilterEntry[2],
-        test: (client) =>
-          clientNameFilterEntry[0] === "" ||
-          client.name
-            .toLowerCase()
-            .includes(clientNameFilterEntry[0].toLowerCase()),
+        entry: useEntry({
+          title: "Client Name",
+        }),
+        test: (client, filterValue) =>
+          filterValue === "" ||
+          client.name.toLowerCase().includes(filterValue.toLowerCase()),
       },
     ]);
 

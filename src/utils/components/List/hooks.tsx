@@ -4,10 +4,12 @@ import { Filter } from "./react";
 
 import { twMerge } from "tailwind-merge";
 
-import type { SummaryDataWithAttrs, Entry } from "./react";
+import type { SummaryDataWithAttrs } from "./react";
+import { EntryAccessorAndComponent } from "../Entry/hook";
 
-type FilterEntry<Item> = Entry & {
-  test: (item: Item) => boolean;
+type FilterEntry<Item> = {
+  entry: EntryAccessorAndComponent;
+  test: (item: Item, entryValue: string) => boolean;
 };
 
 export function useSelection(
@@ -94,10 +96,12 @@ export function useFilter<Item>(
   filteredItems: Item[];
   component: JSX.Element;
 } {
-  const filterComponent = <Filter entries={entries} />;
+  const filterComponent = (
+    <Filter entries={entries.map(({ entry }) => entry)} />
+  );
 
   const filteredItems: Item[] = items.filter((item) =>
-    entries.every((filterEntry) => filterEntry.test(item))
+    entries.every(({ test, entry }) => test(item, entry.value))
   );
 
   return {

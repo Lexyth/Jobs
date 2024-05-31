@@ -21,20 +21,15 @@ type ClientsProps = {
 export function Clients({ className }: ClientsProps): JSX.Element {
   const clientsHandler = useClientsHandler();
 
-  const [filterClientName, setFilterClientName, filterClientNameComponent] =
-    useEntry({
-      title: "Client Name",
-    });
-
   const { filteredItems: filteredClients, component: clientsFilterComponent } =
     useFilter(clientsHandler.getAll(), [
       {
-        get: filterClientName,
-        set: setFilterClientName,
-        component: filterClientNameComponent,
-        test: (client) =>
-          filterClientName === "" ||
-          client.name.toLowerCase().includes(filterClientName.toLowerCase()),
+        entry: useEntry({
+          title: "Client Name",
+        }),
+        test: (client, filterValue) =>
+          filterValue === "" ||
+          client.name.toLowerCase().includes(filterValue.toLowerCase()),
       },
     ]);
 

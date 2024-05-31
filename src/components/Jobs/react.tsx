@@ -27,40 +27,32 @@ export function Jobs({ className }: JobsProps): JSX.Element {
   const clientsHandler = useClientsHandler();
   const jobsHandler = useJobsHandler();
 
-  const [filterClientName, setFilterClientName, filterClientNameComponent] =
-    useEntry({
-      title: "Client Name",
-    });
-
-  const [filterStatus, setFilterStatus, filterStatusComponent] = useEntry({
-    title: "Status",
-    type: "select",
-    defaultDatas: [
-      { value: "" },
-      ...Object.entries(Status).map(([, value]) => ({
-        value: value,
-      })),
-    ],
-  });
-
   const { filteredItems: filteredJobs, component: jobsFilterComponent } =
     useFilter(jobsHandler.getAll(), [
       {
-        get: filterClientName,
-        set: setFilterClientName,
-        component: filterClientNameComponent,
-        test: (job) =>
-          filterClientName === "" ||
+        entry: useEntry({
+          title: "Client Name",
+        }),
+        test: (job, filterValue) =>
+          filterValue === "" ||
           !!clientsHandler
             .get(job.clientId)
             ?.name.toLowerCase()
-            .includes(filterClientName.toLowerCase()),
+            .includes(filterValue.toLowerCase()),
       },
       {
-        get: filterStatus,
-        set: setFilterStatus,
-        component: filterStatusComponent,
-        test: (job) => filterStatus === "" || job.status === filterStatus,
+        entry: useEntry({
+          title: "Status",
+          type: "select",
+          defaultDatas: [
+            { value: "" },
+            ...Object.entries(Status).map(([, value]) => ({
+              value: value,
+            })),
+          ],
+        }),
+        test: (job, filterValue) =>
+          filterValue === "" || job.status === filterValue,
       },
     ]);
 
