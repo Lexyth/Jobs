@@ -20,6 +20,8 @@ import type {
 
 // TODO: remove undefined from className prop; it's only used for when className is set conditionally, but that should be handeled using spreading {...(condition && { className })}
 
+// TODO!: make this a hook like useSelection and useFilter, that returns a button component (Add button), and a function to open the editor.
+
 type Item = Job | Client;
 type Handler<Type extends Item> = Type extends Job
   ? JobsHandler
@@ -34,11 +36,6 @@ type EditableListProps<Type extends Item> = {
   makeItemData: (item: Type) => EntryItemData;
   makeListItems: (items: Type[]) => ListItem[];
   createDefaultItem: () => Type;
-  filterEntries?: [
-    string,
-    React.Dispatch<React.SetStateAction<string>>,
-    JSX.Element
-  ][];
   className?: string | undefined;
 };
 
@@ -57,7 +54,6 @@ export function EditableList<Type extends Item>({
   makeItemData,
   makeListItems,
   createDefaultItem,
-  filterEntries,
   className,
 }: EditableListProps<Type>): JSX.Element {
   const [itemToEdit, setItemToEdit] = React.useState<Type | null>(null);
@@ -109,7 +105,6 @@ export function EditableList<Type extends Item>({
       <List
         summaries={listItems}
         onClick={handleClick}
-        {...(filterEntries ? { filterEntries } : {})}
       />
 
       <Button
