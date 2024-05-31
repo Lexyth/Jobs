@@ -41,30 +41,13 @@ function authorize() {
     return ret;
   }
 
-  // TODO: remove these old code functions and store the code in session instead, since we're not re-using the auth code after the first time; we're using the refresh-token
-
-  function getOldCode() {
-    return window.localStorage.getItem("code");
-  }
-
-  function getNewCode() {
+  function getCodeVerifier() {
     return parseQueryString(window.location.search).code;
-  }
-
-  function getCode() {
-    // TODO: check if old code is still valid
-    const oldCode = getOldCode();
-    const newCode = getNewCode();
-    return oldCode ?? newCode;
-  }
-
-  function hasCode() {
-    return !!getCode();
   }
 
   function storeCodeVerifier(dbxAuth: Dropbox.DropboxAuth) {
     const codeVerifier = dbxAuth.getCodeVerifier();
-    window.localStorage.setItem("codeVerifier", codeVerifier);
+    window.sessionStorage.setItem("codeVerifier", codeVerifier);
   }
 
   function doAuth(dbxAuth: Dropbox.DropboxAuth, REDIRECT_URI: string) {
@@ -88,17 +71,17 @@ function authorize() {
   }
 
   function applyCodeVerifier(dbxAuth: Dropbox.DropboxAuth) {
-    const codeVerifier = window.localStorage.getItem("codeVerifier");
+    const codeVerifier = window.sessionStorage.getItem("codeVerifier");
     dbxAuth.setCodeVerifier(codeVerifier ?? "");
   }
 
   function requestToken(
     dbxAuth: Dropbox.DropboxAuth,
     REDIRECT_URI: string,
-    code: string
+    codeVerifier: string
   ) {
     const promise = dbxAuth
-      .getAccessTokenFromCode(REDIRECT_URI, code)
+      .getAccessTokenFromCode(REDIRECT_URI, codeVerifier)
       .then((response) => {
         const result = response.result as {
           access_token: string;
@@ -122,12 +105,14 @@ function authorize() {
     return window.localStorage.getItem("refreshToken");
   }
 
-  function hasRefreshToken() {
-    return !!getRefreshToken();
+  function setRefreshToken(refreshToken: string | null) {
+    window.localStorage.setItem("refreshToken", refreshToken ?? "");
   }
 
-  function refreshToken(dbxAuth: Dropbox.DropboxAuth) {
-    const refreshToken = getRefreshToken();
+  function refreshToken(
+    dbxAuth: Dropbox.DropboxAuth,
+    refreshToken: string | null
+  ) {
     if (!refreshToken) {
       return;
     }
@@ -153,27 +138,27 @@ function authorize() {
     clientId: CLIENT_ID,
   });
 
-  if (hasRefreshToken()) {
-    refreshToken(dbxAuth);
+  const rToken = getRefreshToken();
+
+  if (rToken) {
+    refreshToken(dbxAuth, rToken);
     const token = dbxAuth.getAccessToken();
     accessDropbox(dbxAuth, token);
     return;
   }
 
-  if (!hasCode()) {
+  const codeVerifier = getCodeVerifier();
+
+  if (!codeVerifier) {
     doAuth(dbxAuth, REDIRECT_URI);
     return;
   }
 
-  const code = getCode();
-
   applyCodeVerifier(dbxAuth);
 
-  const accessPromise = requestToken(dbxAuth, REDIRECT_URI, code).then(
+  const accessPromise = requestToken(dbxAuth, REDIRECT_URI, codeVerifier).then(
     (tokens) => {
-      if (tokens?.refreshToken) {
-        window.localStorage.setItem("refreshToken", tokens.refreshToken);
-      }
+      setRefreshToken(tokens.refreshToken);
       accessDropbox(dbxAuth, tokens?.accessToken);
     }
   );
