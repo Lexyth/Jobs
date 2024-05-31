@@ -1,7 +1,7 @@
 import * as Dropbox from "dropbox";
 
 let dropbox: Dropbox.Dropbox;
-{
+function authorize() {
   function parseQueryString(str: string) {
     const ret = Object.create(null);
 
@@ -143,48 +143,45 @@ let dropbox: Dropbox.Dropbox;
     console.log("Successfully Authenticated for Dropbox API");
   }
 
-  function auth() {
-    console.log("Authenticating for Dropbox API");
+  console.log("Authenticating for Dropbox API");
 
-    const REDIRECT_URI = window.location.href.split("?")[0];
-    if (REDIRECT_URI === undefined)
-      throw new Error("REDIRECT_URI is undefined");
-    const CLIENT_ID = "43pkecavqfklasz";
+  const REDIRECT_URI = window.location.href.split("?")[0];
+  if (REDIRECT_URI === undefined) throw new Error("REDIRECT_URI is undefined");
+  const CLIENT_ID = "43pkecavqfklasz";
 
-    const dbxAuth = new Dropbox.DropboxAuth({
-      clientId: CLIENT_ID,
-    });
+  const dbxAuth = new Dropbox.DropboxAuth({
+    clientId: CLIENT_ID,
+  });
 
-    if (hasRefreshToken()) {
-      refreshToken(dbxAuth);
-      const token = dbxAuth.getAccessToken();
-      accessDropbox(dbxAuth, token);
-      return;
-    }
-
-    if (!hasCode()) {
-      doAuth(dbxAuth, REDIRECT_URI);
-      return;
-    }
-
-    const code = getCode();
-
-    applyCodeVerifier(dbxAuth);
-
-    const accessPromise = requestToken(dbxAuth, REDIRECT_URI, code).then(
-      (tokens) => {
-        if (tokens?.refreshToken) {
-          window.localStorage.setItem("refreshToken", tokens.refreshToken);
-        }
-        accessDropbox(dbxAuth, tokens?.accessToken);
-      }
-    );
-
-    return accessPromise;
+  if (hasRefreshToken()) {
+    refreshToken(dbxAuth);
+    const token = dbxAuth.getAccessToken();
+    accessDropbox(dbxAuth, token);
+    return;
   }
 
-  await auth();
+  if (!hasCode()) {
+    doAuth(dbxAuth, REDIRECT_URI);
+    return;
+  }
+
+  const code = getCode();
+
+  applyCodeVerifier(dbxAuth);
+
+  const accessPromise = requestToken(dbxAuth, REDIRECT_URI, code).then(
+    (tokens) => {
+      if (tokens?.refreshToken) {
+        window.localStorage.setItem("refreshToken", tokens.refreshToken);
+      }
+      accessDropbox(dbxAuth, tokens?.accessToken);
+    }
+  );
+
+  return accessPromise;
 }
+
+await authorize();
 
 function download(
   path: string,
