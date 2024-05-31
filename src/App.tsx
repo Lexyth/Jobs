@@ -2,16 +2,15 @@ import React from "react";
 
 import { Clients } from "./components/Clients/react";
 import { Jobs } from "./components/Jobs/react";
-import { Invoice } from "./components/Invoice/react";
+import { Invoices } from "./components/Invoice/react";
 
 import { Button } from "./utils/components/Button/react";
 
-// TODO?: load clients and jobs at startup
+// TODO?: load clients and jobs at startup.
 
-// TODO: show somehow that the data is currently not in synch, so the user knows when he can savely exit
-// TODO?: show a saving symbol while the data is being saved, or a min of 1-2 seconds
+// TODO?: show a saving symbol while the data is being saved, or for a min period, so it's not too flashy.
 
-// TODO: add a way to set the range of dates for the jobs and invoices shown
+// TODO: show somehow that the data is currently not in synch, so the user knows when he can savely exit and when not.
 
 const clientsView = {
   title: "Clients",
@@ -25,7 +24,7 @@ const jobsView = {
 
 const invoiceView = {
   title: "Invoices",
-  element: <Invoice className="w-11/12" />,
+  element: <Invoices className="w-11/12" />,
 };
 
 export default function App() {

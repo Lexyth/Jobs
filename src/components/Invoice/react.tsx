@@ -97,7 +97,7 @@ type InvoiceProps = {
   className?: string;
 };
 
-export function Invoice({ className }: InvoiceProps): JSX.Element {
+export function Invoices({ className }: InvoiceProps): JSX.Element {
   const [showCreator, setShowCreator] = React.useState(false);
 
   return (
