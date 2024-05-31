@@ -24,4 +24,16 @@ module.exports = {
       { allowConstantExport: true },
     ],*/
   },
+  overrides: [
+    {
+      files: ["*.ts", "*.tsx"],
+      rules: {
+        "no-undef": "off",
+        "no-redeclare": "off",
+        "@typescript-eslint/no-redeclare": "error",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "error",
+      },
+    },
+  ],
 };
