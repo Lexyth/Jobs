@@ -5,6 +5,7 @@ import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 
 import { useClientsHandler } from "./hook";
 import { useEntry } from "../../utils/components/Entry/hook";
+import { useFilter } from "../../utils/components/List/hooks";
 
 import { makeListItemsFromClients } from "./script";
 
@@ -24,6 +25,18 @@ export function Clients({ className }: ClientsProps): JSX.Element {
     useEntry({
       title: "Client Name",
     });
+
+  const { filteredItems: filteredClients, component: clientsFilterComponent } =
+    useFilter(clientsHandler.getAll(), [
+      {
+        get: filterClientName,
+        set: setFilterClientName,
+        component: filterClientNameComponent,
+        test: (client) =>
+          filterClientName === "" ||
+          client.name.toLowerCase().includes(filterClientName.toLowerCase()),
+      },
+    ]);
 
   const handleCreateNewItem = React.useCallback(function (
     client: Client,
@@ -56,26 +69,19 @@ export function Clients({ className }: ClientsProps): JSX.Element {
     return <LoadingSpinner />;
   }
 
-  let clients: Client[] = clientsHandler.getAll();
-
-  if (filterClientName !== "") {
-    clients = clients.filter((client) =>
-      client.name.toLowerCase().includes(filterClientName.toLowerCase())
-    );
-  }
-
   return (
-    <EditableList<Client>
-      items={clients}
-      createNewItem={handleCreateNewItem}
-      handler={clientsHandler}
-      makeItemData={handleMakeItemData}
-      makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
-      createDefaultItem={handleCreateDefaultItem}
-      filterEntries={[
-        [filterClientName, setFilterClientName, filterClientNameComponent],
-      ]}
-      className={className}
-    />
+    <>
+      {clientsFilterComponent}
+
+      <EditableList<Client>
+        items={filteredClients}
+        createNewItem={handleCreateNewItem}
+        handler={clientsHandler}
+        makeItemData={handleMakeItemData}
+        makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
+        createDefaultItem={handleCreateDefaultItem}
+        className={className}
+      />
+    </>
   );
 }
