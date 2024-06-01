@@ -142,11 +142,10 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     makeListItemsFromClients(filteredClients);
 
   const {
-    selection: [selectedClientIndex_],
+    selection: [selectedClientIndex_OrNull],
     handleSelect: handleSelectClient,
-  }: { selection: (number | null)[]; handleSelect: (index: number) => void } =
-    useSelection(clientItems, null);
-  const selectedClientIndex = selectedClientIndex_ ?? null;
+  } = useSelection(filteredClients, null);
+  const selectedClientIndex = selectedClientIndex_OrNull ?? null;
 
   const selectedClient: Client | null =
     (selectedClientIndex === null
@@ -171,7 +170,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     selection: selectedJobsIndexes,
     setSelection: setSelectedJobsIndexes,
     handleSelect: handleSelectJob,
-  } = useSelection(filteredJobsItems, []);
+  } = useSelection(filteredJobs, []);
 
   const selectedJobs: Job[] = selectedJobsIndexes.map((index) => {
     const job: Job | undefined = filteredJobs[index];

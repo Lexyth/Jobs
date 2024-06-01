@@ -5,9 +5,6 @@ import { Modal } from "../Modal/react";
 import { Editor } from "../Editor/react";
 import { Button } from "../Button/react";
 
-import { twMerge } from "tailwind-merge";
-
-import type { SummaryDataWithAttrs } from "./react";
 import type { EntryAccessorAndComponent } from "../Entry/hook";
 import type { EntryDataMap, EntryValueMap } from "../Editor/react";
 
@@ -16,8 +13,10 @@ type FilterEntry<Item> = {
   test: (item: Item, entryValue: string) => boolean;
 };
 
-export function useSelection(
-  summaryDatas: SummaryDataWithAttrs[],
+// TODO!: return number or number[] depending on singleSelection
+
+export function useSelection<Item>(
+  items: Item[],
   initialSelection: null | number | number[],
   onSelectionChange?: (index: number, selection: number[]) => boolean | void
 ): {
@@ -72,19 +71,9 @@ export function useSelection(
     [onSelectionChange, singleSelection, selection]
   );
 
-  summaryDatas.forEach((summaryData, index) => {
-    if (!selection.includes(index)) {
-      return;
-    }
-
-    if (summaryData._attrs === undefined) {
-      summaryData._attrs = {};
-    }
-    summaryData._attrs.className = twMerge(
-      "bg-red-300 hover:bg-red-200 active:bg-red-100",
-      summaryData._attrs.className
-    );
-  });
+  React.useEffect(() => {
+    setSelection([]);
+  }, [items]);
 
   return {
     selection: selection,
@@ -100,18 +89,20 @@ export function useFilter<Item>(
   filteredItems: Item[];
   component: JSX.Element;
 } {
-  const filterComponent = (
-    <Filter entries={entries.map(({ entry }) => entry)} />
-  );
+  return React.useMemo(() => {
+    const filterComponent = (
+      <Filter entries={entries.map(({ entry }) => entry)} />
+    );
 
-  const filteredItems: Item[] = items.filter((item) =>
-    entries.every(({ test, entry }) => test(item, entry.value))
-  );
+    const filteredItems: Item[] = items.filter((item) =>
+      entries.every(({ test, entry }) => test(item, entry.value))
+    );
 
-  return {
-    filteredItems,
-    component: filterComponent,
-  };
+    return {
+      filteredItems,
+      component: filterComponent,
+    };
+  }, [entries, items]);
 }
 
 export function useEditor<Item extends {}>(
