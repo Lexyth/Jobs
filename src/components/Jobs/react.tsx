@@ -8,7 +8,7 @@ import { useJobsHandler } from "./hook";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useEditor, useFilter } from "../../utils/components/List/hooks";
 
-import { makeListItems } from "./script";
+import { toSummaryData } from "./script";
 
 import { twMerge } from "tailwind-merge";
 
@@ -203,7 +203,7 @@ export function Jobs({ className }: JobsProps): JSX.Element {
       {editorComponent}
 
       <List
-        summaries={makeListItems(filteredJobs, clientsHandler)}
+        summaries={filteredJobs.map((job) => toSummaryData(job, clientsHandler))}
         onClick={(index) => {
           const item = filteredJobs[index];
           if (item === undefined)
