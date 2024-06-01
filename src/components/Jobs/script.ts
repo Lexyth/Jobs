@@ -3,7 +3,7 @@ import { SummaryDataWithAttrs } from "../../utils/components/List/react.js";
 
 import type { Job } from "./store.js";
 
-export function makeListItemsFromJobs(
+export function makeListItems(
   jobs: Job[],
   clientsHandler: ClientsHandler
 ): SummaryDataWithAttrs[] {

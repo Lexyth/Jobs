@@ -9,14 +9,14 @@ import { twMerge } from "tailwind-merge";
 
 import type { EntryProps } from "../Entry/hook";
 
-export type ItemData = Record<string, EntryProps>;
-export type ItemValues = Record<string, string>;
+export type EntryDataMap = Record<string, EntryProps>;
+export type EntryValueMap = Record<string, string>;
 
-type DataEntries = Record<string, JSX.Element>;
+type EntryComponentMap = Record<string, JSX.Element>;
 
 type EditorProps = {
-  itemData: ItemData;
-  onSave: (newItemValues: ItemValues) => void;
+  entryDataMap: EntryDataMap;
+  onSave: (newEntryValueMap: EntryValueMap) => void;
   onCancel: () => void;
   onDelete?: () => void;
   className?: string;
@@ -29,7 +29,7 @@ type DeleteModalProps = {
 };
 
 export function Editor({
-  itemData,
+  entryDataMap,
   onSave,
   onCancel,
   onDelete,
@@ -37,16 +37,16 @@ export function Editor({
 }: EditorProps): JSX.Element {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
-  const newItemValues: ItemValues = {};
-  const itemDataEntries: DataEntries = {};
-  for (const [key, dataEntryData] of Object.entries(itemData)) {
+  const entryValueMap: EntryValueMap = {};
+  const entryComponentMap: EntryComponentMap = {};
+  for (const [key, data] of Object.entries(entryDataMap)) {
     //eslint-disable-next-line react-hooks/rules-of-hooks
-    const { value, component: dataEntry } = useEntry({
-      ...dataEntryData,
+    const { value, component } = useEntry({
+      ...data,
     });
 
-    newItemValues[key] = value;
-    itemDataEntries[key] = dataEntry;
+    entryValueMap[key] = value;
+    entryComponentMap[key] = component;
   }
 
   return (
@@ -66,13 +66,13 @@ export function Editor({
       )}
 
       <div className="w-full m-4 p-4 flex flex-row justify-evenly items-center flex-wrap">
-        {Object.values(itemDataEntries)}
+        {Object.values(entryComponentMap)}
       </div>
 
       <div className="w-full m-4 mt-auto p-4 flex flex-row justify-evenly items-center gap-4">
         <Button
           title="Save"
-          onClick={() => onSave(newItemValues)}
+          onClick={() => onSave(entryValueMap)}
         />
 
         <Button

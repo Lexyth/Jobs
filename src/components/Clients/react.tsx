@@ -1,16 +1,18 @@
 import React from "react";
 
-import { EditableList } from "../../utils/components/EditableList/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
+import { List } from "../../utils/components/List/react";
 
 import { useClientsHandler } from "./hook";
 import { useEntry } from "../../utils/components/Entry/hook";
-import { useFilter } from "../../utils/components/List/hooks";
+import { useFilter, useEditor } from "../../utils/components/List/hooks";
 
-import { makeListItemsFromClients } from "./script";
+import { makeListItems } from "./script";
 
-import { type Client } from "./store";
-import { type ItemValues as EditorItemValues } from "../../utils/components/Editor/react";
+import { twMerge } from "tailwind-merge";
+
+import type { Client } from "./store";
+import type { EntryDataMap } from "../../utils/components/Editor/react";
 
 type ClientsProps = {
   className?: string;
@@ -33,18 +35,7 @@ export function Clients({ className }: ClientsProps): JSX.Element {
       },
     ]);
 
-  const handleCreateNewItem = React.useCallback(function (
-    client: Client,
-    newClientData: EditorItemValues
-  ) {
-    return {
-      ...client,
-      ...newClientData,
-    };
-  },
-  []);
-
-  const handleMakeItemData = React.useCallback(function (client: Client) {
+  const toEntryDataMap = React.useCallback((client: Client): EntryDataMap => {
     return {
       name: {
         title: "Name",
@@ -53,30 +44,59 @@ export function Clients({ className }: ClientsProps): JSX.Element {
     };
   }, []);
 
-  const handleCreateDefaultItem = React.useCallback(function () {
+  const createDefaultItem = React.useCallback((): Client => {
     return {
       id: 0,
       name: "Unknown Client",
     };
   }, []);
 
+  const {
+    handleEditItem: handleEditClient,
+    editorComponent,
+    addButton,
+  } = useEditor(
+    (client: Client, entryValues) => {
+      const newClient = { ...client, ...entryValues };
+
+      if (!clientsHandler.set(newClient)) {
+        clientsHandler.add(newClient);
+      }
+    },
+    (client: Client) => {
+      clientsHandler.remove(client);
+    },
+    toEntryDataMap,
+    createDefaultItem
+  );
+
   if (!clientsHandler.loaded) {
     return <LoadingSpinner />;
   }
 
   return (
-    <>
+    <div
+      className={twMerge(
+        "m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400",
+        className
+      )}
+    >
       {clientsFilterComponent}
 
-      <EditableList<Client>
-        items={filteredClients}
-        createNewItem={handleCreateNewItem}
-        handler={clientsHandler}
-        makeItemData={handleMakeItemData}
-        makeListItems={(clients: Client[]) => makeListItemsFromClients(clients)}
-        createDefaultItem={handleCreateDefaultItem}
-        className={className}
-      />
-    </>
+      {editorComponent}
+
+      <List
+        summaries={makeListItems(filteredClients)}
+        onClick={(index) => {
+          const client = filteredClients[index];
+          if (client === undefined)
+            throw new Error(`Expected client at index ${index}.`);
+          handleEditClient(client);
+        }}
+        {...(className ? { className } : {})}
+      ></List>
+
+      {addButton}
+    </div>
   );
 }

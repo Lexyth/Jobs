@@ -1,11 +1,15 @@
 import React from "react";
 
 import { Filter } from "./react";
+import { Modal } from "../Modal/react";
+import { Editor } from "../Editor/react";
+import { Button } from "../Button/react";
 
 import { twMerge } from "tailwind-merge";
 
 import type { SummaryDataWithAttrs } from "./react";
-import { EntryAccessorAndComponent } from "../Entry/hook";
+import type { EntryAccessorAndComponent } from "../Entry/hook";
+import type { EntryDataMap, EntryValueMap } from "../Editor/react";
 
 type FilterEntry<Item> = {
   entry: EntryAccessorAndComponent;
@@ -107,5 +111,78 @@ export function useFilter<Item>(
   return {
     filteredItems,
     component: filterComponent,
+  };
+}
+
+export function useEditor<Item extends {}>(
+  onSave: (item: Item, entryValueMap: EntryValueMap) => false | void,
+  onDelete: (item: Item) => false | void,
+  toEntryDataMap: (item: Item) => EntryDataMap,
+  createDefaultItem: () => Item
+): {
+  handleEditItem: (item: Item) => void;
+  editorComponent: JSX.Element | null;
+  addButton: JSX.Element;
+} {
+  const [itemToEdit, setItemToEdit] = React.useState<Item | null>(null);
+
+  const handleEditItem = React.useCallback((item: Item) => {
+    setItemToEdit(item);
+  }, []);
+
+  const handleCancel = React.useCallback(() => {
+    setItemToEdit(null);
+  }, []);
+
+  const handleSave = React.useCallback(
+    (newEntryValueMap: EntryValueMap) => {
+      if (itemToEdit === null) {
+        throw new Error("No item to save.");
+      }
+
+      if (onSave(itemToEdit, newEntryValueMap) !== false) {
+        handleCancel();
+      }
+    },
+    [itemToEdit, handleCancel, onSave]
+  );
+
+  const handleDelete = React.useCallback(() => {
+    if (itemToEdit === null) {
+      throw new Error("No item to delete.");
+    }
+
+    if (onDelete(itemToEdit) !== false) {
+      handleCancel();
+    }
+  }, [itemToEdit, handleCancel, onDelete]);
+
+  const addButton = (
+    <Button
+      title="Add"
+      onClick={() => handleEditItem(createDefaultItem())}
+    />
+  );
+
+  let editorComponent = null;
+  if (itemToEdit !== null) {
+    const entryDataMap = toEntryDataMap(itemToEdit);
+
+    editorComponent = (
+      <Modal onClickOutside={handleCancel}>
+        <Editor
+          entryDataMap={entryDataMap}
+          onCancel={() => handleCancel()}
+          onSave={(newEntryValueMap) => handleSave(newEntryValueMap)}
+          onDelete={() => handleDelete()}
+        />
+      </Modal>
+    );
+  }
+
+  return {
+    handleEditItem,
+    editorComponent,
+    addButton,
   };
 }

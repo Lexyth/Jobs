@@ -10,8 +10,8 @@ import { useJobsHandler } from "../Jobs/hook";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useSelection } from "../../utils/components/List/hooks";
 
-import { makeListItemsFromJobs } from "../Jobs/script";
-import { makeListItemsFromClients } from "../Clients/script";
+import { makeListItems as makeListItemsFromJobs } from "../Jobs/script";
+import { makeListItems as makeListItemsFromClients } from "../Clients/script";
 import { createInvoice } from "./script";
 
 import { twMerge } from "tailwind-merge";

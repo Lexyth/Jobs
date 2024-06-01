@@ -1,21 +1,20 @@
 import React from "react";
 
-import { EditableList } from "../../utils/components/EditableList/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
+import { List } from "../../utils/components/List/react";
 
 import { useClientsHandler } from "../Clients/hook";
 import { useJobsHandler } from "./hook";
 import { useEntry } from "../../utils/components/Entry/hook";
-import { useFilter } from "../../utils/components/List/hooks";
+import { useEditor, useFilter } from "../../utils/components/List/hooks";
 
-import { makeListItemsFromJobs } from "./script";
+import { makeListItems } from "./script";
+
+import { twMerge } from "tailwind-merge";
 
 import { Status } from "./store";
 import type { Job } from "./store";
-import type {
-  ItemValues as EditorItemValues,
-  ItemData as EditorItemData,
-} from "../../utils/components/Editor/react";
+import type { EntryDataMap } from "../../utils/components/Editor/react";
 
 type JobsProps = {
   className?: string;
@@ -46,8 +45,8 @@ export function Jobs({ className }: JobsProps): JSX.Element {
           type: "select",
           defaultDatas: [
             { value: "" },
-            ...Object.entries(Status).map(([, value]) => ({
-              value: value,
+            ...Object.entries(Status).map(([, status]) => ({
+              value: status,
             })),
           ],
         }),
@@ -56,30 +55,12 @@ export function Jobs({ className }: JobsProps): JSX.Element {
       },
     ]);
 
-  const handleCreateNewItem = React.useCallback(
-    function (job: Job, newJobData: EditorItemValues) {
-      const clientName = newJobData["clientName"];
-      if (clientName === undefined)
-        throw new Error("Missing clientName in newJobData");
-      const newClient = clientsHandler.get(clientName);
-      if (newClient === undefined)
-        throw new Error(`Client not found (id: ${newJobData["clientId"]})`);
-
-      return {
-        ...job,
-        ...newJobData,
-        clientId: newClient.id,
-      };
-    },
-    [clientsHandler]
-  );
-
-  const handleMakeItemData = React.useCallback(
-    function (job: Job): EditorItemData {
+  const toEntryDataMap = React.useCallback(
+    (job: Job): EntryDataMap => {
       return {
         clientName: {
           title: "Client",
-          type: "select",
+          type: "select"!,
           defaultDatas: [
             { value: "" },
             ...clientsHandler.getAll().map((client) => ({
@@ -150,7 +131,7 @@ export function Jobs({ className }: JobsProps): JSX.Element {
     [clientsHandler]
   );
 
-  const handleCreateDefaultItem = React.useCallback(function (): Job {
+  const createDefaultItem = React.useCallback((): Job => {
     const fullDate = new Date();
     const date =
       fullDate.getFullYear() +
@@ -173,23 +154,65 @@ export function Jobs({ className }: JobsProps): JSX.Element {
     };
   }, []);
 
+  const {
+    handleEditItem: handleEditJob,
+    editorComponent,
+    addButton,
+  } = useEditor(
+    (job: Job, entryValues) => {
+      const clientName = entryValues["clientName"];
+      if (clientName === undefined)
+        throw new Error("Expected clientName in entryValues");
+
+      if (clientName === "") {
+        // TODO!: notify user in a better way than an alert
+        alert("Please select a client.");
+        return false;
+      }
+
+      const jobClient = clientsHandler.get(clientName);
+      if (jobClient === undefined)
+        throw new Error(`Client not found (id: ${entryValues["clientId"]})`);
+
+      const newJob = { ...job, ...entryValues, clientId: jobClient.id };
+
+      if (!jobsHandler.set(newJob)) {
+        jobsHandler.add(newJob);
+      }
+    },
+    (job: Job) => {
+      jobsHandler.remove(job);
+    },
+    toEntryDataMap,
+    createDefaultItem
+  );
+
   if (!clientsHandler.loaded || !jobsHandler.loaded) {
     return <LoadingSpinner />;
   }
 
   return (
-    <>
+    <div
+      className={twMerge(
+        "m-4 p-4 flex flex-col justify-first items-center gap-4 overflow-x-hidden overflow-y-auto rounded bg-slate-300 shadow shadow-slate-400",
+        className
+      )}
+    >
       {jobsFilterComponent}
 
-      <EditableList<Job>
-        items={filteredJobs}
-        createNewItem={handleCreateNewItem}
-        handler={jobsHandler}
-        makeItemData={handleMakeItemData}
-        makeListItems={(jobs) => makeListItemsFromJobs(jobs, clientsHandler)}
-        createDefaultItem={handleCreateDefaultItem}
-        className={className}
-      />
-    </>
+      {editorComponent}
+
+      <List
+        summaries={makeListItems(filteredJobs, clientsHandler)}
+        onClick={(index) => {
+          const item = filteredJobs[index];
+          if (item === undefined)
+            throw new Error(`Expected item at index ${index}.`);
+          handleEditJob(item);
+        }}
+      ></List>
+
+      {addButton}
+    </div>
   );
 }
