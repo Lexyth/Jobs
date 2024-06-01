@@ -10,8 +10,8 @@ import { useJobsHandler } from "../Jobs/hook";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useSelection } from "../../utils/components/List/hooks";
 
-import { makeListItems as makeListItemsFromJobs } from "../Jobs/script";
-import { makeListItems as makeListItemsFromClients } from "../Clients/script";
+import { toSummaryData as toSummaryData_Job } from "../Jobs/script";
+import { toSummaryData as toSummaryData_Client } from "../Clients/script";
 import { createInvoice } from "./script";
 
 import { twMerge } from "tailwind-merge";
@@ -19,7 +19,6 @@ import { twMerge } from "tailwind-merge";
 import { Status } from "../Jobs/store";
 import type { Job } from "../Jobs/store";
 import type { Client } from "../Clients/store";
-import type { SummaryDataWithAttrs } from "../../utils/components/List/react";
 
 // TODO!: Add an invoice editor, so that all data in an Invoice entry can be edited.
 
@@ -124,22 +123,37 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   const clientsHandler = useClientsHandler();
   const jobsHandler = useJobsHandler();
 
-  const clients = clientsHandler.loaded ? clientsHandler.getAll() : [];
+  const clientsLoaded = clientsHandler.loaded;
 
-  const { filteredItems: filteredClients, component: clientsFilterComponent } =
-    useFilter(clients, [
+  const clients = React.useMemo(() => {
+    console.log("ReMemo clients", "Loaded: ", clientsLoaded);
+    return clientsHandler.getAll();
+  }, [clientsHandler, clientsLoaded]);
+
+  const clientNameEntry = useEntry({ title: "Client Name" });
+
+  const clientsFilterEntries = React.useMemo(() => {
+    console.log("ReMemo clientsFilterEntries");
+    return [
       {
-        entry: useEntry({
-          title: "Client Name",
-        }),
-        test: (client, filterValue) =>
-          filterValue === "" ||
-          client.name.toLowerCase().includes(filterValue.toLowerCase()),
+        entry: clientNameEntry,
+        test: (client: Client, entryValue: string) =>
+          entryValue === "" ||
+          client.name.toLowerCase().includes(entryValue.toLowerCase()),
       },
-    ]);
+    ];
+  }, [clientNameEntry]);
 
-  const clientItems: SummaryDataWithAttrs[] =
-    makeListItemsFromClients(filteredClients);
+  const clientsFilter = useFilter(clients, clientsFilterEntries);
+
+  React.useMemo(() => {
+    console.log("ReMemo clientsFilter", clientsFilter);
+  }, [clientsFilter]);
+
+  const filteredClients = clientsFilter.filteredItems;
+  const clientsFilterComponent = clientsFilter.component;
+
+  const selectedClientRef = React.useRef<Client | null>(null);
 
   const {
     selection: [selectedClientIndex_OrNull],
@@ -152,19 +166,23 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
       ? null
       : filteredClients[selectedClientIndex]) ?? null;
 
-  const filteredJobs: Job[] = jobsHandler.loaded
-    ? jobsHandler
-        .getAll()
-        .filter(
-          (job) =>
-            (selectedClient ? selectedClient.id === job.clientId : true) &&
-            job.status === Status.InvoicePending
-        )
-    : [];
+  selectedClientRef.current = selectedClient;
 
-  const filteredJobsItems: SummaryDataWithAttrs[] = clientsHandler.loaded
-    ? makeListItemsFromJobs(filteredJobs, clientsHandler)
-    : [];
+  const jobsLoaded = jobsHandler.loaded;
+
+  const filteredJobs: Job[] = React.useMemo(
+    () =>
+      jobsLoaded
+        ? jobsHandler
+            .getAll()
+            .filter(
+              (job) =>
+                (selectedClient ? selectedClient.id === job.clientId : true) &&
+                job.status === Status.InvoicePending
+            )
+        : [],
+    [jobsHandler, jobsLoaded, selectedClient]
+  );
 
   const {
     selection: selectedJobsIndexes,
@@ -172,31 +190,63 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     handleSelect: handleSelectJob,
   } = useSelection(filteredJobs, []);
 
-  const selectedJobs: Job[] = selectedJobsIndexes.map((index) => {
-    const job: Job | undefined = filteredJobs[index];
-    if (!job) {
-      throw new Error("Job at index " + index + " was undefined.");
-    }
-    return job;
-  });
+  const handleToSummaryData_Client = React.useCallback(
+    (client: Client) =>
+      toSummaryData_Client(
+        client,
+        client === selectedClient
+          ? {
+              className:
+                "bg-slate-300 hover:bg-slate-200 active:bg-slate-100 font-bold",
+            }
+          : undefined
+      ),
+    [selectedClient]
+  );
+
+  const handleOnClickSummary_Client = React.useCallback(
+    (index: number) => {
+      handleSelectClient(index);
+      setSelectedJobsIndexes([]);
+    },
+    [handleSelectClient, setSelectedJobsIndexes]
+  );
+
+  const disabled = selectedClient === null || filteredJobs.length === 0;
+
+  const selectedJobs: Job[] = React.useMemo(
+    () =>
+      selectedJobsIndexes.map((index) => {
+        const job: Job | undefined = filteredJobs[index];
+        if (!job) {
+          throw new Error("Job at index " + index + " was undefined.");
+        }
+        return job;
+      }),
+    [selectedJobsIndexes, filteredJobs]
+  );
+
+  const handleToSummaryData_Job = React.useCallback(
+    (job: Job) =>
+      toSummaryData_Job(job, clientsHandler, {
+        className: twMerge(
+          disabled && "text-gray-400",
+          selectedJobs.includes(job) &&
+            "bg-slate-300 hover:bg-slate-200 active:bg-slate-100 font-bold"
+        ),
+      }),
+    [selectedJobs, clientsHandler, disabled]
+  );
+
+  const handleOnClickSummary_Job = React.useCallback(
+    (index: number) => {
+      return disabled ? undefined : handleSelectJob(index);
+    },
+    [disabled, handleSelectJob]
+  );
 
   if (!clientsHandler.loaded || !jobsHandler.loaded) {
     return <LoadingSpinner />;
-  }
-
-  const disabled: boolean =
-    selectedClient === null || filteredJobs.length === 0;
-
-  if (disabled) {
-    filteredJobsItems.forEach((summaryData) => {
-      if (!summaryData._attrs) {
-        summaryData._attrs = {};
-      }
-      summaryData._attrs.className = twMerge(
-        "text-gray-400",
-        summaryData._attrs.className
-      );
-    });
   }
 
   return (
@@ -211,18 +261,17 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
       {clientsFilterComponent}
 
       <List
-        summaries={clientItems}
-        onClick={(index) => {
-          handleSelectClient(index);
-          setSelectedJobsIndexes([]);
-        }}
+        items={filteredClients}
+        toSummaryData={handleToSummaryData_Client}
+        onClick={handleOnClickSummary_Client}
       />
 
       <h2 className="text-xl font-semibold">Jobs</h2>
 
       <List
-        summaries={filteredJobsItems}
-        onClick={(index) => (disabled ? undefined : handleSelectJob(index))}
+        items={filteredJobs}
+        toSummaryData={handleToSummaryData_Job}
+        onClick={handleOnClickSummary_Job}
       />
 
       <Button
