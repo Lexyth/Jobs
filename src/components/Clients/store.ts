@@ -15,7 +15,7 @@ export type Client = {
   "Nr."?: string;
 };
 
-export const clientsStore = createPersistentCSVStore<Client>(
+export const store = createPersistentCSVStore<Client>(
   [],
   "clients.csv",
   (client) => {

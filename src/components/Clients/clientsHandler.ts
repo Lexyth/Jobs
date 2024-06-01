@@ -1,4 +1,4 @@
-import { clientsStore } from "./store";
+import { store as store } from "./store";
 
 import type { Client } from "./store";
 
@@ -14,46 +14,47 @@ export class ClientsHandler {
   }
 
   get loaded(): boolean {
-    return clientsStore.loaded;
+    return store.loaded;
+  }
+
+  get rev(): number {
+    return store.rev;
   }
 
   add(client: Client): number {
     client.id =
-      clientsStore
-        .get()
-        .reduce((id, client) => (client.id > id ? client.id : id), 0) + 1;
-    const newClients = [...clientsStore.get(), { ...client }];
-    clientsStore.set(newClients);
+      store.get().reduce((id, client) => (client.id > id ? client.id : id), 0) +
+      1;
+    const newClients = [...store.get(), { ...client }];
+    store.set(newClients);
     return client.id;
   }
 
   remove(client: Client | number): boolean {
     let newClients;
     if (client instanceof Object) {
-      newClients = clientsStore
+      newClients = store
         .get()
         .filter((oldClient) => oldClient.id !== client.id);
     } else {
-      newClients = clientsStore
-        .get()
-        .filter((oldClient) => oldClient.id !== client);
+      newClients = store.get().filter((oldClient) => oldClient.id !== client);
     }
-    clientsStore.set(newClients);
-    return newClients.length !== clientsStore.get().length;
+    store.set(newClients);
+    return newClients.length !== store.get().length;
   }
 
   set(client: Client): boolean {
-    const index = clientsStore
+    const index = store
       .get()
       .findIndex((oldClient) => oldClient.id === client.id);
 
     if (index === -1) {
       return false;
     } else {
-      clientsStore.set([
-        ...clientsStore.get().slice(0, index),
+      store.set([
+        ...store.get().slice(0, index),
         { ...client },
-        ...clientsStore.get().slice(index + 1),
+        ...store.get().slice(index + 1),
       ]);
       return true;
     }
@@ -62,9 +63,9 @@ export class ClientsHandler {
   get(identifier: string | number): Client | void {
     let client: Client | undefined;
     if (typeof identifier === "string") {
-      client = clientsStore.get().find((client) => client.name === identifier);
+      client = store.get().find((client) => client.name === identifier);
     } else {
-      client = clientsStore.get().find((client) => client.id === identifier);
+      client = store.get().find((client) => client.id === identifier);
     }
 
     if (client === undefined) return;
@@ -72,6 +73,6 @@ export class ClientsHandler {
   }
 
   getAll(): Client[] {
-    return [...clientsStore.get()];
+    return [...store.get()];
   }
 }

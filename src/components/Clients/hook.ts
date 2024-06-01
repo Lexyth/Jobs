@@ -1,9 +1,9 @@
 import React from "react";
 
-import { clientsStore } from "./store";
+import { store } from "./store";
 import { ClientsHandler } from "./clientsHandler";
 
 export function useClientsHandler() {
-  React.useSyncExternalStore(clientsStore.subscribe, clientsStore.getSnapshot);
+  React.useSyncExternalStore(store.subscribe, store.getSnapshot);
   return new ClientsHandler();
 }
