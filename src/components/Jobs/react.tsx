@@ -203,14 +203,15 @@ export function Jobs({ className }: JobsProps): JSX.Element {
       {editorComponent}
 
       <List
-        summaries={filteredJobs.map((job) => toSummaryData(job, clientsHandler))}
+        items={filteredJobs}
+        toSummaryData={(job) => toSummaryData(job, clientsHandler)}
         onClick={(index) => {
-          const item = filteredJobs[index];
-          if (item === undefined)
+          const job = filteredJobs[index];
+          if (job === undefined)
             throw new Error(`Expected item at index ${index}.`);
-          handleEditJob(item);
+          handleEditJob(job);
         }}
-      ></List>
+      />
 
       {addButton}
     </div>

@@ -25,9 +25,10 @@ export type SummaryProps = {
   className?: string;
 };
 
-export type ListProps = {
-  summaries: SummaryDataWithAttrs[];
-  onClick?: (summaryIndex: number, summaries: SummaryData[]) => void;
+export type ListProps<Item extends {}> = {
+  items: Item[];
+  toSummaryData: (item: Item) => SummaryDataWithAttrs;
+  onClick?: (index: number, items: Item[]) => void;
   className?: string;
 };
 
@@ -82,16 +83,19 @@ export function Summary({
   );
 }
 
-export function List({
-  summaries,
+// TODO!: List should take in items and convert them to summaryData
+
+export function List<Item extends {}>({
+  items,
+  toSummaryData,
   onClick,
   className,
-}: ListProps): JSX.Element {
+}: ListProps<Item>): JSX.Element {
   const handleClick = React.useCallback(
     (index: number) => {
-      onClick?.(index, summaries);
+      onClick?.(index, items);
     },
-    [onClick, summaries]
+    [onClick, items]
   );
 
   return (
@@ -101,14 +105,17 @@ export function List({
         className
       )}
     >
-      {summaries.map((summary, index) => (
-        <Summary
-          key={index}
-          {...summary["_attrs"]}
-          summaryData={summary}
-          onClick={() => handleClick(index)}
-        />
-      ))}
+      {items.map((item, index) => {
+        const summaryData = toSummaryData(item);
+        return (
+          <Summary
+            key={index}
+            {...summaryData["_attrs"]}
+            summaryData={summaryData}
+            onClick={() => handleClick(index)}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -86,15 +86,15 @@ export function Clients({ className }: ClientsProps): JSX.Element {
       {editorComponent}
 
       <List
-        summaries={filteredClients.map((client) => toSummaryData(client))}
+        items={filteredClients}
+        toSummaryData={(client) => toSummaryData(client)}
         onClick={(index) => {
           const client = filteredClients[index];
           if (client === undefined)
-            throw new Error(`Expected client at index ${index}.`);
+            throw new Error(`Expected item at index ${index}.`);
           handleEditClient(client);
         }}
-        {...(className ? { className } : {})}
-      ></List>
+      />
 
       {addButton}
     </div>
