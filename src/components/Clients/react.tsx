@@ -7,7 +7,7 @@ import { useClientsHandler } from "./hook";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useEditor } from "../../utils/components/List/hooks";
 
-import { makeListItems } from "./script";
+import { toSummaryData } from "./script";
 
 import { twMerge } from "tailwind-merge";
 
@@ -86,7 +86,7 @@ export function Clients({ className }: ClientsProps): JSX.Element {
       {editorComponent}
 
       <List
-        summaries={makeListItems(filteredClients)}
+        summaries={filteredClients.map((client) => toSummaryData(client))}
         onClick={(index) => {
           const client = filteredClients[index];
           if (client === undefined)

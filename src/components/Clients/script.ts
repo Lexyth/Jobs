@@ -1,14 +1,17 @@
 import type { Client } from "./store.js";
 import type { SummaryDataWithAttrs } from "../../utils/components/List/react.js";
 
-export function makeListItems(clients: Client[]) {
-  const items: SummaryDataWithAttrs[] = clients.map((client) => {
-    const item: SummaryDataWithAttrs = {
-      name: client.name,
-    };
+export function toSummaryData(
+  client: Client,
+  _attrs?: SummaryDataWithAttrs["_attrs"]
+): SummaryDataWithAttrs {
+  const summary: SummaryDataWithAttrs = {
+    name: client.name,
+  };
 
-    return item;
-  });
+  if (_attrs) {
+    summary._attrs = _attrs;
+  }
 
-  return items;
+  return summary;
 }
