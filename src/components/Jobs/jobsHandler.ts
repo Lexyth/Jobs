@@ -2,6 +2,8 @@ import { store } from "./store";
 
 import type { Job } from "./store";
 
+// TODO!: make actions async and return a promise, so we can wait for results and disable buttons or such while loading
+
 export class JobsHandler {
   static #instance: JobsHandler | null = null;
 
@@ -15,6 +17,10 @@ export class JobsHandler {
 
   get loaded(): boolean {
     return store.loaded;
+  }
+
+  get rev(): number {
+    return store.rev;
   }
 
   add(job: Job): number {
