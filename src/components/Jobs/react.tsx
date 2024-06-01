@@ -29,9 +29,7 @@ export function Jobs({ className }: JobsProps): JSX.Element {
   const { filteredItems: filteredJobs, component: jobsFilterComponent } =
     useFilter(jobsHandler.getAll(), [
       {
-        entry: useEntry({
-          title: "Client Name",
-        }),
+        entry: useEntry("Client Name"),
         test: (job, filterValue) =>
           filterValue === "" ||
           !!clientsHandler
@@ -40,16 +38,12 @@ export function Jobs({ className }: JobsProps): JSX.Element {
             .includes(filterValue.toLowerCase()),
       },
       {
-        entry: useEntry({
-          title: "Status",
-          type: "select",
-          defaultDatas: [
-            { value: "" },
-            ...Object.entries(Status).map(([, status]) => ({
-              value: status,
-            })),
-          ],
-        }),
+        entry: useEntry("Status", "select", [
+          { value: "" },
+          ...Object.entries(Status).map(([, status]) => ({
+            value: status,
+          })),
+        ]),
         test: (job, filterValue) =>
           filterValue === "" || job.status === filterValue,
       },

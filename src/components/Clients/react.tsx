@@ -26,9 +26,7 @@ export function Clients({ className }: ClientsProps): JSX.Element {
   const { filteredItems: filteredClients, component: clientsFilterComponent } =
     useFilter(clientsHandler.getAll(), [
       {
-        entry: useEntry({
-          title: "Client Name",
-        }),
+        entry: useEntry("Client Name"),
         test: (client, filterValue) =>
           filterValue === "" ||
           client.name.toLowerCase().includes(filterValue.toLowerCase()),

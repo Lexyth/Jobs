@@ -130,7 +130,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     return clientsHandler.getAll();
   }, [clientsHandler, clientsLoaded]);
 
-  const clientNameEntry = useEntry({ title: "Client Name" });
+  const clientNameEntry = useEntry("Client Name");
 
   const clientsFilterEntries = React.useMemo(() => {
     console.log("ReMemo clientsFilterEntries");

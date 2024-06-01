@@ -12,14 +12,12 @@ export type EntryAccessorAndComponent = {
   component: JSX.Element;
 };
 
-// TODO: replace object with parameter for each key (e.g. EntryProps["title"])
-
-export function useEntry({
-  title,
-  type = "input",
-  defaultDatas,
-  attributes,
-}: EntryProps): EntryAccessorAndComponent {
+export function useEntry(
+  title: EntryProps["title"],
+  type: EntryProps["type"] = "input",
+  defaultDatas?: EntryProps["defaultDatas"],
+  attributes?: EntryProps["attributes"]
+): EntryAccessorAndComponent {
   const [value, setValue] = React.useState(
     (defaultDatas &&
       defaultDatas.find((defaultData) => defaultData.current === true)
@@ -28,7 +26,6 @@ export function useEntry({
   );
 
   const entryAccessorAndComponent = React.useMemo(() => {
-    console.log("ReMemo entryAccessorAndComponent");
     return {
       value,
       set: setValue,

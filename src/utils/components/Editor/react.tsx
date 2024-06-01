@@ -28,6 +28,8 @@ type DeleteModalProps = {
   className?: string;
 };
 
+// TODO?: consider replacing entryDataMap with entryList and just pass in [useEntry(...), useEntry(...)]; would also avoid using useEntry in a loop
+
 export function Editor({
   entryDataMap,
   onSave,
@@ -41,9 +43,12 @@ export function Editor({
   const entryComponentMap: EntryComponentMap = {};
   for (const [key, data] of Object.entries(entryDataMap)) {
     //eslint-disable-next-line react-hooks/rules-of-hooks
-    const { value, component } = useEntry({
-      ...data,
-    });
+    const { value, component } = useEntry(
+      data.title,
+      data.type,
+      data.defaultDatas,
+      data.attributes
+    );
 
     entryValueMap[key] = value;
     entryComponentMap[key] = component;
