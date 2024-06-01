@@ -5,6 +5,7 @@ export type Store<Type> = {
   set: (newValue: Type) => void;
   subscribe: (listener: () => void) => () => void;
   getSnapshot: () => Type;
+  rev: number;
 };
 
 export type PersistentStore<Type> = Store<Type> & {
@@ -16,6 +17,8 @@ export type PersistentStore<Type> = Store<Type> & {
 
 export function createStore<Type>(initialValue: Type): Store<Type> {
   let value: Type = initialValue;
+
+  let rev = 0;
 
   let listeners: (() => void)[] = [];
 
@@ -45,6 +48,7 @@ export function createStore<Type>(initialValue: Type): Store<Type> {
 
   function set(newValue: Type): void {
     value = newValue;
+    rev = rev + 1;
     emit();
   }
 
@@ -53,6 +57,7 @@ export function createStore<Type>(initialValue: Type): Store<Type> {
     set,
     subscribe,
     getSnapshot,
+    rev,
   };
 
   return store;
