@@ -6,6 +6,9 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/strict",
+    "plugin:react-perf/recommended",
   ],
   ignorePatterns: ["dist", ".eslintrc.cjs"],
   parser: "@typescript-eslint/parser",
@@ -14,6 +17,7 @@ module.exports = {
   plugins: [
     "react-refresh",
     "react",
+    "react-perf",
     "@typescript-eslint",
     "@typescript-eslint/eslint-plugin",
   ],
