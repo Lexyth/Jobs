@@ -83,8 +83,6 @@ export function Summary({
   );
 }
 
-// TODO!: List should take in items and convert them to summaryData
-
 export function List<Item extends {}>({
   items,
   toSummaryData,

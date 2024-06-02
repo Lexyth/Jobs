@@ -158,7 +158,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   const {
     selection: [selectedClientIndex_OrNull],
     handleSelect: handleSelectClient,
-  } = useSelection(filteredClients, null);
+  } = useSelection(filteredClients, [], true);
   const selectedClientIndex = selectedClientIndex_OrNull ?? null;
 
   const selectedClient: Client | null =

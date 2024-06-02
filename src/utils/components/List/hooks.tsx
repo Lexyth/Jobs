@@ -13,28 +13,19 @@ type FilterEntry<Item> = {
   test: (item: Item, entryValue: string) => boolean;
 };
 
-// TODO!: return number or number[] depending on singleSelection
-
 export function useSelection<Item>(
   items: Item[],
-  initialSelection: null | number | number[],
+  initialSelection?: number[],
+  isSingleSelection?: boolean,
   onSelectionChange?: (index: number, selection: number[]) => boolean | void
 ): {
   selection: number[];
   setSelection: React.Dispatch<React.SetStateAction<number[]>>;
   handleSelect: (index: number) => void;
 } {
-  const singleSelection = !Array.isArray(initialSelection);
-
-  if (!Array.isArray(initialSelection)) {
-    if (initialSelection === null) {
-      initialSelection = [];
-    } else {
-      initialSelection = [initialSelection];
-    }
-  }
-
-  const [selection, setSelection] = React.useState<number[]>(initialSelection);
+  const [selection, setSelection] = React.useState<number[]>(
+    initialSelection ?? []
+  );
 
   const handleChangeSelection = React.useCallback(
     (index: number) => {
@@ -42,8 +33,11 @@ export function useSelection<Item>(
       const selectIt = onSelectionChange?.(index, selection);
 
       if (selectIt === undefined) {
-        if (singleSelection) {
-          setSelection(selection[0] === index ? [] : [index]);
+        // toggle selection
+
+        if (isSingleSelection) {
+          const newIndex = selection[0] === index ? [] : [index];
+          setSelection(newIndex);
           return;
         }
 
@@ -56,19 +50,22 @@ export function useSelection<Item>(
           setSelection(newSelection);
         }
       } else {
-        if (singleSelection) {
-          setSelection(selectIt ? [index] : []);
+        if (isSingleSelection) {
+          const newIndex = selectIt ? [index] : [];
+          setSelection(newIndex);
           return;
         }
 
         if (selectIt) {
+          // select
           setSelection([...selection, index]);
         } else {
+          // deselect
           setSelection(selection.filter((value) => value !== index));
         }
       }
     },
-    [onSelectionChange, singleSelection, selection]
+    [onSelectionChange, selection, isSingleSelection]
   );
 
   React.useEffect(() => {
@@ -76,8 +73,8 @@ export function useSelection<Item>(
   }, [items]);
 
   return {
-    selection: selection,
-    setSelection: setSelection,
+    selection,
+    setSelection,
     handleSelect: handleChangeSelection,
   };
 }
