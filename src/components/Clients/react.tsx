@@ -68,6 +68,21 @@ export function Clients({ className }: ClientsProps): JSX.Element {
     createDefaultItem
   );
 
+  const handleToSummaryData = React.useCallback(
+    (client: Client) => toSummaryData(client),
+    []
+  );
+
+  const handleClick_List = React.useCallback(
+    (index: number) => {
+      const client = filteredClients[index];
+      if (client === undefined)
+        throw new Error(`Expected item at index ${index}.`);
+      handleEditClient(client);
+    },
+    [handleEditClient, filteredClients]
+  );
+
   if (!clientsHandler.loaded) {
     return <LoadingSpinner />;
   }
@@ -85,13 +100,8 @@ export function Clients({ className }: ClientsProps): JSX.Element {
 
       <List
         items={filteredClients}
-        toSummaryData={(client) => toSummaryData(client)}
-        onClick={(index) => {
-          const client = filteredClients[index];
-          if (client === undefined)
-            throw new Error(`Expected item at index ${index}.`);
-          handleEditClient(client);
-        }}
+        toSummaryData={handleToSummaryData}
+        onClick={handleClick_List}
       />
 
       {addButton}

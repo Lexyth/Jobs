@@ -28,7 +28,8 @@ type DeleteModalProps = {
   className?: string;
 };
 
-// TODO?: consider replacing entryDataMap with entryList and just pass in [useEntry(...), useEntry(...)]; would also avoid using useEntry in a loop
+// TODO!: replace entryDataMap with entryList and just pass in [useEntry(...), useEntry(...)]; would also avoid using useEntry in a loop
+// TODO!: return { entryValueMap, entryComponentMap } from a useMemo hook once useEntry is handled outside
 
 export function Editor({
   entryDataMap,
@@ -39,7 +40,12 @@ export function Editor({
 }: EditorProps): JSX.Element {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
-  const entryValueMap: EntryValueMap = {};
+  const entryValueMap: EntryValueMap = React.useMemo(
+    () => {
+      return {};
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [entryDataMap] // TODO!: fix this once we replace entryDataMap with entryList. For now we need this to reset entryValueMap when entryDataMap changes
+  );
   const entryComponentMap: EntryComponentMap = {};
   for (const [key, data] of Object.entries(entryDataMap)) {
     //eslint-disable-next-line react-hooks/rules-of-hooks
@@ -53,6 +59,14 @@ export function Editor({
     entryValueMap[key] = value;
     entryComponentMap[key] = component;
   }
+
+  const handleSave = React.useCallback(() => {
+    onSave(entryValueMap);
+  }, [entryValueMap, onSave]);
+
+  const handleShowDeleteModal = React.useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
 
   return (
     <div
@@ -77,18 +91,18 @@ export function Editor({
       <div className="w-full m-4 mt-auto p-4 flex flex-row justify-evenly items-center gap-4">
         <Button
           title="Save"
-          onClick={() => onSave(entryValueMap)}
+          onClick={handleSave}
         />
 
         <Button
           title="Cancel"
-          onClick={() => onCancel()}
+          onClick={onCancel}
         />
 
         {onDelete && (
           <Button
             title="Delete"
-            onClick={() => setShowDeleteModal(true)}
+            onClick={handleShowDeleteModal}
             className="bg-red-500 text-white hover:bg-red-400 active:bg-red-300"
           />
         )}
@@ -105,6 +119,11 @@ function DeleteModal({
   const hideModal = React.useCallback(() => {
     setShowDeleteModal(false);
   }, [setShowDeleteModal]);
+
+  const handleClick = React.useCallback(() => {
+    hideModal();
+    onDelete();
+  }, [hideModal, onDelete]);
 
   return (
     <Modal onClickOutside={hideModal}>
@@ -124,10 +143,7 @@ function DeleteModal({
 
           <Button
             title="Yes"
-            onClick={() => {
-              hideModal();
-              onDelete();
-            }}
+            onClick={handleClick}
             className="bg-red-500 text-white hover:bg-red-400 active:bg-red-300"
           />
         </div>

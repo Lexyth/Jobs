@@ -6,6 +6,8 @@ import type { EntryProps } from "./react";
 
 export type { EntryProps as EntryProps };
 
+const DEFAULT_defaultDatas: [] = [];
+
 export type EntryAccessorAndComponent = {
   value: string;
   set: React.Dispatch<React.SetStateAction<string>>;
@@ -34,7 +36,7 @@ export function useEntry(
           key={title}
           title={title}
           type={type}
-          defaultDatas={defaultDatas ?? []}
+          defaultDatas={defaultDatas ?? DEFAULT_defaultDatas}
           {...(attributes && { attributes })}
           value={value}
           setValue={setValue}

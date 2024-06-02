@@ -94,6 +94,14 @@ type InvoiceProps = {
 export function Invoices({ className }: InvoiceProps): JSX.Element {
   const [showCreator, setShowCreator] = React.useState(false);
 
+  const handleClickOutside = React.useCallback(() => {
+    setShowCreator(false);
+  }, [setShowCreator]);
+
+  const handleClick = React.useCallback(() => {
+    setShowCreator(!showCreator);
+  }, [showCreator]);
+
   return (
     <div className={className}>
       {
@@ -101,14 +109,14 @@ export function Invoices({ className }: InvoiceProps): JSX.Element {
         false ? (
           <>
             {showCreator && (
-              <Modal onClickOutside={() => setShowCreator(false)}>
+              <Modal onClickOutside={handleClickOutside}>
                 <InvoiceCreator />
               </Modal>
             )}
 
             <Button
               title="Create"
-              onClick={() => setShowCreator(!showCreator)}
+              onClick={handleClick}
             />
           </>
         ) : (
@@ -245,6 +253,38 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     [disabled, handleSelectJob]
   );
 
+  const handleClick_Button = React.useCallback(() => {
+    const selectedClientName_Fancy = `${selectedClient?.name}(#${selectedClient?.id})`;
+    const jobsString = JSON.stringify(
+      selectedJobs.length === 0 ? filteredJobs : selectedJobs
+    );
+
+    console.debug(
+      `Creating an invoice for client ${selectedClientName_Fancy} from jobs ${jobsString}`
+    );
+
+    if (selectedClient === null) {
+      throw new Error(
+        "No client selected. Button should not have been pressable."
+      );
+    }
+
+    if (selectedJobs.length === 0) {
+      throw new Error(
+        "No jobs selected. Button should not have been pressable."
+      );
+    }
+
+    const Invoice: Invoice = createInvoice({
+      client: selectedClient,
+      jobList: selectedJobs,
+    });
+
+    console.debug(`Invoice: ${JSON.stringify(Invoice)}`);
+  }, [selectedClient, selectedJobs, filteredJobs]);
+
+  const buttonAttrs = React.useMemo(() => ({ disabled }), [disabled]);
+
   if (!clientsHandler.loaded || !jobsHandler.loaded) {
     return <LoadingSpinner />;
   }
@@ -278,36 +318,8 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
         title={`Create Invoice for ${
           selectedJobs.length === 0 ? " all " : `(${selectedJobs.length}) `
         } Jobs`}
-        onClick={() => {
-          const selectedClientName_Fancy = `${selectedClient?.name}(#${selectedClient?.id})`;
-          const jobsString = JSON.stringify(
-            selectedJobs.length === 0 ? filteredJobs : selectedJobs
-          );
-
-          console.debug(
-            `Creating an invoice for client ${selectedClientName_Fancy} from jobs ${jobsString}`
-          );
-
-          if (selectedClient === null) {
-            throw new Error(
-              "No client selected. Button should not have been pressable."
-            );
-          }
-
-          if (selectedJobs.length === 0) {
-            throw new Error(
-              "No jobs selected. Button should not have been pressable."
-            );
-          }
-
-          const Invoice: Invoice = createInvoice({
-            client: selectedClient,
-            jobList: selectedJobs,
-          });
-
-          console.debug(`Invoice: ${JSON.stringify(Invoice)}`);
-        }}
-        attrs={{ disabled }}
+        onClick={handleClick_Button}
+        attrs={buttonAttrs}
       />
     </div>
   );

@@ -50,6 +50,17 @@ export function Entry({
     </option>
   ));
 
+  const handleValueChange = React.useCallback(
+    (
+      event: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >
+    ) => {
+      setValue(event.target.value);
+    },
+    [setValue]
+  );
+
   let element;
   switch (type) {
     case "input":
@@ -59,7 +70,7 @@ export function Entry({
             ? { min: 0, step: 0.01 }
             : {})}
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={handleValueChange}
           {...(attributes as EntryTypesMapping["input"])}
           className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         />
@@ -81,7 +92,7 @@ export function Entry({
       element = (
         <textarea
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={handleValueChange}
           {...(attributes as EntryTypesMapping["textarea"])}
           className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         />
@@ -92,7 +103,7 @@ export function Entry({
       element = (
         <select
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={handleValueChange}
           {...(attributes as EntryTypesMapping["select"])}
           className="max-w-[75%] m-1 p-1 indent-2 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
         >
@@ -112,7 +123,7 @@ export function Entry({
               : {})}
             list={datalistId}
             value={value}
-            onChange={(event) => setValue(event.target.value)}
+            onChange={handleValueChange}
             {...(attributes as EntryTypesMapping["datalist"])}
             className="max-w-[75%] m-1 p-1 flex-1 rounded border border-slate-400 shadow-md shadow-slate-400 text-center"
           />

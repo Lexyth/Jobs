@@ -145,10 +145,14 @@ export function useEditor<Item extends {}>(
     }
   }, [itemToEdit, handleCancel, onDelete]);
 
+  const handleClick_Add = React.useCallback(() => {
+    handleEditItem(createDefaultItem());
+  }, [handleEditItem, createDefaultItem]);
+
   const addButton = (
     <Button
       title="Add"
-      onClick={() => handleEditItem(createDefaultItem())}
+      onClick={handleClick_Add}
     />
   );
 
@@ -160,9 +164,9 @@ export function useEditor<Item extends {}>(
       <Modal onClickOutside={handleCancel}>
         <Editor
           entryDataMap={entryDataMap}
-          onCancel={() => handleCancel()}
-          onSave={(newEntryValueMap) => handleSave(newEntryValueMap)}
-          onDelete={() => handleDelete()}
+          onCancel={handleCancel}
+          onSave={handleSave}
+          onDelete={handleDelete}
         />
       </Modal>
     );

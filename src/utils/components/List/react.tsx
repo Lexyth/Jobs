@@ -89,9 +89,11 @@ export function List<Item extends {}>({
   onClick,
   className,
 }: ListProps<Item>): JSX.Element {
-  const handleClick = React.useCallback(
+  const createClickHandler = React.useCallback(
     (index: number) => {
-      onClick?.(index, items);
+      return () => {
+        onClick?.(index, items);
+      };
     },
     [onClick, items]
   );
@@ -110,7 +112,7 @@ export function List<Item extends {}>({
             key={index}
             {...summaryData["_attrs"]}
             summaryData={summaryData}
-            onClick={() => handleClick(index)}
+            onClick={createClickHandler(index)}
           />
         );
       })}
@@ -121,12 +123,22 @@ export function List<Item extends {}>({
 export function Filter({ entries }: FilterProps): JSX.Element {
   const [expanded, setExpanded] = React.useState(false);
 
+  const handleClose = React.useCallback(() => {
+    setExpanded(!expanded);
+  }, [expanded]);
+
+  const handleClear = React.useCallback(() => {
+    for (const entry of entries) {
+      entry.set("");
+    }
+  }, [entries]);
+
   if (!expanded) {
     return (
       <div>
         <Button
           title="Filter"
-          onClick={() => setExpanded(true)}
+          onClick={handleClose}
         />
       </div>
     );
@@ -138,15 +150,11 @@ export function Filter({ entries }: FilterProps): JSX.Element {
       <div>
         <Button
           title="Clear"
-          onClick={() => {
-            for (const entry of entries) {
-              entry.set("");
-            }
-          }}
+          onClick={handleClear}
         />
         <Button
           title="Close"
-          onClick={() => setExpanded(false)}
+          onClick={handleClose}
         />
       </div>
     </div>

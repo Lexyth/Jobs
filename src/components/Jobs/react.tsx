@@ -54,7 +54,7 @@ export function Jobs({ className }: JobsProps): JSX.Element {
       return {
         clientName: {
           title: "Client",
-          type: "select"!,
+          type: "select",
           defaultDatas: [
             { value: "" },
             ...clientsHandler.getAll().map((client) => ({
@@ -181,6 +181,21 @@ export function Jobs({ className }: JobsProps): JSX.Element {
     createDefaultItem
   );
 
+  const handleToSummaryData = React.useCallback(
+    (job: Job) => toSummaryData(job, clientsHandler),
+    [clientsHandler]
+  );
+
+  const handleClick_List = React.useCallback(
+    (index: number) => {
+      const job = filteredJobs[index];
+      if (job === undefined)
+        throw new Error(`Expected item at index ${index}.`);
+      handleEditJob(job);
+    },
+    [handleEditJob, filteredJobs]
+  );
+
   if (!clientsHandler.loaded || !jobsHandler.loaded) {
     return <LoadingSpinner />;
   }
@@ -198,13 +213,8 @@ export function Jobs({ className }: JobsProps): JSX.Element {
 
       <List
         items={filteredJobs}
-        toSummaryData={(job) => toSummaryData(job, clientsHandler)}
-        onClick={(index) => {
-          const job = filteredJobs[index];
-          if (job === undefined)
-            throw new Error(`Expected item at index ${index}.`);
-          handleEditJob(job);
-        }}
+        toSummaryData={handleToSummaryData}
+        onClick={handleClick_List}
       />
 
       {addButton}
