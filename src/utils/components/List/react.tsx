@@ -25,7 +25,7 @@ export type SummaryProps = {
   className?: string;
 };
 
-export type ListProps<Item extends {}> = {
+export type ListProps<Item extends object> = {
   items: Item[];
   toSummaryData: (item: Item) => SummaryDataWithAttrs;
   onClick?: (index: number, items: Item[]) => void;
@@ -83,7 +83,7 @@ export function Summary({
   );
 }
 
-export function List<Item extends {}>({
+export function List<Item extends object>({
   items,
   toSummaryData,
   onClick,

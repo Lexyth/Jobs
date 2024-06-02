@@ -17,7 +17,10 @@ export function useSelection<Item>(
   items: Item[],
   initialSelection?: number[],
   isSingleSelection?: boolean,
-  onSelectionChange?: (index: number, selection: number[]) => boolean | void
+  onSelectionChange?: (
+    index: number,
+    selection: number[]
+  ) => boolean | undefined
 ): {
   selection: number[];
   setSelection: React.Dispatch<React.SetStateAction<number[]>>;
@@ -102,9 +105,9 @@ export function useFilter<Item>(
   }, [entries, items]);
 }
 
-export function useEditor<Item extends {}>(
-  onSave: (item: Item, entryValueMap: EntryValueMap) => false | void,
-  onDelete: (item: Item) => false | void,
+export function useEditor<Item extends object>(
+  onSave: (item: Item, entryValueMap: EntryValueMap) => boolean | undefined,
+  onDelete: (item: Item) => boolean | undefined,
   toEntryDataMap: (item: Item) => EntryDataMap,
   createDefaultItem: () => Item
 ): {

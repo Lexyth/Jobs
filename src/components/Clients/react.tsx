@@ -60,9 +60,11 @@ export function Clients({ className }: ClientsProps): JSX.Element {
       if (!clientsHandler.set(newClient)) {
         clientsHandler.add(newClient);
       }
+      return true;
     },
     (client: Client) => {
       clientsHandler.remove(client);
+      return true;
     },
     toEntryDataMap,
     createDefaultItem

@@ -176,6 +176,7 @@ export function Jobs({ className }: JobsProps): JSX.Element {
     },
     (job: Job) => {
       jobsHandler.remove(job);
+      return true;
     },
     toEntryDataMap,
     createDefaultItem

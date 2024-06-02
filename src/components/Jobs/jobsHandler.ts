@@ -57,7 +57,7 @@ export class JobsHandler {
     }
   }
 
-  get(id: number): Job | void {
+  get(id: number): Job | undefined {
     const job = store.get().find((job) => job.id === id);
 
     if (job === undefined) return;

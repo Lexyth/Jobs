@@ -60,7 +60,7 @@ export class ClientsHandler {
     }
   }
 
-  get(identifier: string | number): Client | void {
+  get(identifier: string | number): Client | undefined {
     let client: Client | undefined;
     if (typeof identifier === "string") {
       client = store.get().find((client) => client.name === identifier);
