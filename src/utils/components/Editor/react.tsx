@@ -3,11 +3,9 @@ import React from "react";
 import { Modal } from "../Modal/react";
 import { Button } from "../Button/react";
 
-import { useEntry } from "../Entry/hook";
-
 import { twMerge } from "tailwind-merge";
 
-import type { EntryProps } from "../Entry/hook";
+import type { EntryAccessorAndComponent, EntryProps } from "../Entry/hook";
 
 export type EntryDataMap = Record<string, EntryProps>;
 export type EntryValueMap = Record<string, string>;
@@ -15,7 +13,7 @@ export type EntryValueMap = Record<string, string>;
 type EntryComponentMap = Record<string, JSX.Element>;
 
 type EditorProps = {
-  entryDataMap: EntryDataMap;
+  entryMap: Record<string, EntryAccessorAndComponent>;
   onSave: (newEntryValueMap: EntryValueMap) => void;
   onCancel: () => void;
   onDelete?: () => void;
@@ -28,11 +26,10 @@ type DeleteModalProps = {
   className?: string;
 };
 
-// TODO!: replace entryDataMap with entryList and just pass in [useEntry(...), useEntry(...)]; would also avoid using useEntry in a loop
 // TODO!: return { entryValueMap, entryComponentMap } from a useMemo hook once useEntry is handled outside
 
 export function Editor({
-  entryDataMap,
+  entryMap,
   onSave,
   onCancel,
   onDelete,
@@ -40,33 +37,25 @@ export function Editor({
 }: EditorProps): JSX.Element {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
-  const entryValueMap: EntryValueMap = React.useMemo(
-    () => {
-      return {};
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [entryDataMap] // TODO!: fix this once we replace entryDataMap with entryList. For now we need this to reset entryValueMap when entryDataMap changes
-  );
-  const entryComponentMap: EntryComponentMap = {};
-  for (const [key, data] of Object.entries(entryDataMap)) {
-    //eslint-disable-next-line react-hooks/rules-of-hooks
-    const { value, component } = useEntry(
-      data.title,
-      data.type,
-      data.defaultDatas,
-      data.attributes
-    );
+  const { entryValueMap, entryComponentMap } = React.useMemo(() => {
+    const entryValueMap: EntryValueMap = {};
+    const entryComponentMap: EntryComponentMap = {};
 
-    entryValueMap[key] = value;
-    entryComponentMap[key] = component;
-  }
+    for (const [key, entry] of Object.entries(entryMap)) {
+      entryValueMap[key] = entry.value;
+      entryComponentMap[key] = entry.component;
+    }
+
+    return { entryValueMap, entryComponentMap };
+  }, [entryMap]);
 
   const handleSave = React.useCallback(() => {
     onSave(entryValueMap);
-  }, [entryValueMap, onSave]);
+  }, [onSave, entryValueMap]);
 
   const handleShowDeleteModal = React.useCallback(() => {
     setShowDeleteModal(true);
-  }, []);
+  }, [setShowDeleteModal]);
 
   return (
     <div

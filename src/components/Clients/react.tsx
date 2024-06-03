@@ -3,7 +3,8 @@ import React from "react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { List } from "../../utils/components/List/react";
 
-import { useClientsHandler } from "./hook";
+import { useClientsHandler } from "./hooks";
+import { useEntryMap } from "./hooks";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useEditor } from "../../utils/components/List/hooks";
 
@@ -12,7 +13,6 @@ import { toSummaryData } from "./script";
 import { twMerge } from "tailwind-merge";
 
 import type { Client } from "./store";
-import type { EntryDataMap } from "../../utils/components/Editor/react";
 
 type ClientsProps = {
   className?: string;
@@ -32,15 +32,6 @@ export function Clients({ className }: ClientsProps): JSX.Element {
           client.name.toLowerCase().includes(filterValue.toLowerCase()),
       },
     ]);
-
-  const toEntryDataMap = React.useCallback((client: Client): EntryDataMap => {
-    return {
-      name: {
-        title: "Name",
-        defaultDatas: [{ current: true, value: client.name }],
-      },
-    };
-  }, []);
 
   const createDefaultItem = React.useCallback((): Client => {
     return {
@@ -66,7 +57,7 @@ export function Clients({ className }: ClientsProps): JSX.Element {
       clientsHandler.remove(client);
       return true;
     },
-    toEntryDataMap,
+    useEntryMap,
     createDefaultItem
   );
 

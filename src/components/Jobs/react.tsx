@@ -3,8 +3,8 @@ import React from "react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { List } from "../../utils/components/List/react";
 
-import { useClientsHandler } from "../Clients/hook";
-import { useJobsHandler } from "./hook";
+import { useClientsHandler } from "../Clients/hooks";
+import { useEntryMap, useJobsHandler } from "./hooks";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useEditor, useFilter } from "../../utils/components/List/hooks";
 
@@ -14,7 +14,6 @@ import { twMerge } from "tailwind-merge";
 
 import { Status } from "./store";
 import type { Job } from "./store";
-import type { EntryDataMap } from "../../utils/components/Editor/react";
 
 type JobsProps = {
   className?: string;
@@ -49,81 +48,8 @@ export function Jobs({ className }: JobsProps): JSX.Element {
       },
     ]);
 
-  const toEntryDataMap = React.useCallback(
-    (job: Job): EntryDataMap => {
-      return {
-        clientName: {
-          title: "Client",
-          type: "select",
-          defaultDatas: [
-            { value: "" },
-            ...clientsHandler.getAll().map((client) => ({
-              current: client.id === job.clientId,
-              value: client.name,
-            })),
-          ],
-        },
-        date: {
-          title: "Date",
-          attributes: { type: "date" },
-          defaultDatas: [{ current: true, value: job.date }],
-        },
-        description: {
-          title: "Description",
-          type: "textarea",
-          defaultDatas: [{ current: true, value: job.description }],
-        },
-        count: {
-          title: "Count",
-          attributes: { type: "number" },
-          defaultDatas: [{ current: true, value: job.count.toString() }],
-        },
-        price: {
-          title: "Price",
-          type: "datalist",
-          attributes: { type: "number" },
-          defaultDatas: [
-            { current: true, value: job.price.toString() },
-            { description: "Global", value: "0" },
-            { description: "Client - Word Price", value: "0" },
-            { description: "Client - Line Price", value: "0" },
-            { description: "Client - Page Price", value: "0" },
-            { description: "Suggested", value: "0" },
-          ],
-        },
-        net: {
-          title: "Net",
-          attributes: { type: "number" },
-          defaultDatas: [{ current: true, value: job.net.toString() }],
-        },
-        vat: {
-          title: "Vat",
-          type: "datalist",
-          attributes: { type: "number" },
-          defaultDatas: [
-            { current: true, value: job.vat.toString() },
-            { description: "Global", value: "0.19" },
-            { description: "Client", value: "0.07" },
-            { description: "Suggested", value: "0" },
-          ],
-        },
-        gross: {
-          title: "Gross",
-          attributes: { type: "number" },
-          defaultDatas: [{ current: true, value: job.gross.toString() }],
-        },
-        status: {
-          title: "Status",
-          type: "select",
-          defaultDatas: Object.entries(Status).map(([, value]) => ({
-            value: value,
-            current: value === job.status,
-          })),
-        },
-      };
-    },
-    [clientsHandler]
-  );
+  const useEntryMapWithClientsHandler = (job: Job) =>
+    useEntryMap(job, clientsHandler);
 
   const createDefaultItem = React.useCallback((): Job => {
     const fullDate = new Date();
@@ -178,7 +104,7 @@ export function Jobs({ className }: JobsProps): JSX.Element {
       jobsHandler.remove(job);
       return true;
     },
-    toEntryDataMap,
+    useEntryMapWithClientsHandler,
     createDefaultItem
   );
 

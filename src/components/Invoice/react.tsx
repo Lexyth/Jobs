@@ -5,8 +5,8 @@ import { Button } from "../../utils/components/Button/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { Modal } from "../../utils/components/Modal/react";
 
-import { useClientsHandler } from "../Clients/hook";
-import { useJobsHandler } from "../Jobs/hook";
+import { useClientsHandler } from "../Clients/hooks";
+import { useJobsHandler } from "../Jobs/hooks";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useSelection } from "../../utils/components/List/hooks";
 
@@ -134,14 +134,12 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   const clientsLoaded = clientsHandler.loaded;
 
   const clients = React.useMemo(() => {
-    console.log("ReMemo clients", "Loaded: ", clientsLoaded);
-    return clientsHandler.getAll();
+    return clientsLoaded ? clientsHandler.getAll() : [];
   }, [clientsHandler, clientsLoaded]);
 
   const clientNameEntry = useEntry("Client Name");
 
   const clientsFilterEntries = React.useMemo(() => {
-    console.log("ReMemo clientsFilterEntries");
     return [
       {
         entry: clientNameEntry,
@@ -153,10 +151,6 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
   }, [clientNameEntry]);
 
   const clientsFilter = useFilter(clients, clientsFilterEntries);
-
-  React.useMemo(() => {
-    console.log("ReMemo clientsFilter", clientsFilter);
-  }, [clientsFilter]);
 
   const filteredClients = clientsFilter.filteredItems;
   const clientsFilterComponent = clientsFilter.component;
