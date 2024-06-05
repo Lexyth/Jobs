@@ -2,13 +2,12 @@ import { RootLogger } from "./logging";
 
 const logger = RootLogger.getLogger("Dropbox");
 const authLogger = logger.getLogger("Auth");
-authLogger.level = "info";
 
 import * as Dropbox from "dropbox";
 
 let dropbox: Dropbox.Dropbox;
 function authorize() {
-  authLogger.log("Authorizing...");
+  authLogger["info"]("Authorizing...");
 
   function parseQueryString(str: string) {
     const ret = Object.create(null);
@@ -133,7 +132,7 @@ function authorize() {
     dropbox = new Dropbox.Dropbox({
       auth: dbxAuth,
     });
-    authLogger.log("Authenticated...");
+    authLogger["info"]("Authorized...");
   }
 
   authLogger.log("Authenticating...");
@@ -148,6 +147,8 @@ function authorize() {
 
   // TODO: restructure the refreshToken process to set a token variable and just check for that in accessPromise
 
+  authLogger.log("Checking for refresh token...");
+
   const rToken = getRefreshToken();
 
   if (rToken) {
@@ -157,14 +158,20 @@ function authorize() {
     return;
   }
 
+  authLogger.log("No refresh token found...");
+
+  authLogger.log("Checking for code verifier...");
+
   const codeVerifier = getCodeVerifier();
 
   if (!codeVerifier) {
-    authLogger.log("Redirecting for authorization...");
+    authLogger["info"]("Redirecting for authorization...");
 
     doAuth(dbxAuth, REDIRECT_URI);
     return;
   }
+
+  authLogger.log("Code verifier found...");
 
   applyCodeVerifier(dbxAuth);
 
@@ -192,7 +199,8 @@ function download(
     function (
       response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>
     ): File {
-      authLogger.log("Downloaded:", response);
+      authLogger["info"]("Downloaded:", response);
+
       const fileMetadata = response.result as Dropbox.files.FileMetadata & {
         fileBlob: Blob;
       };
@@ -222,7 +230,7 @@ function upload(
 
   return statusPromise.then(
     function (response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>) {
-      authLogger.log("Uploaded:", response);
+      authLogger["info"]("Uploaded:", response);
       return true;
     },
     function (error: Dropbox.DropboxResponseError<Dropbox.files.UploadError>) {
