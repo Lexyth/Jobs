@@ -208,6 +208,15 @@ const getLoggerGlobally = (namespace: string, config?: LoggerConfig) => {
   return logger;
 };
 
+const createPrefix = (level: string, namespace: string) => {
+  let l = `[${level}]`;
+  if (themes[level] !== undefined) {
+    l = theme(l, level);
+  }
+  const n = `[${namespace}]`;
+  return l + n;
+};
+
 // TODO!: consider having everything configurable be overidable by namespaceConfig.
 
 const createLogger = (namespace: string, config?: LoggerConfig) => {
