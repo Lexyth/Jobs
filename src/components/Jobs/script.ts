@@ -22,8 +22,10 @@ export function toSummaryData(
     );
   }
 
+  const clientName = client?.name ?? `Unknown Client (${job.clientId})`;
+
   const summary: SummaryDataWithAttrs = {
-    client: client.name,
+    client: clientName,
     date: job.date,
     description: job.description,
     gross: job.gross.toString(),
