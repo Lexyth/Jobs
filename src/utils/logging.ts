@@ -147,7 +147,7 @@ const theme = (text: string, themeName: string) => {
   );
 };
 
-defineHandler("NONE", 0, console.log.bind(console, theme("[NONE]", "NONE")));
+defineHandler("NONE", 0, console.log.bind(console));
 
 const defineConsoleHandler = (
   name: string,
@@ -172,7 +172,7 @@ const defineConsoleHandler = (
     name.toUpperCase(),
     sibling.toUpperCase(),
     relation,
-    method.bind(console, theme(`[${name}]`, name.toUpperCase()))
+    method.bind(console)
   );
 };
 
@@ -182,12 +182,7 @@ defineConsoleHandler("LOG", "log", "DEBUG", 1);
 defineConsoleHandler("INFO", "info", "LOG", 1);
 defineConsoleHandler("WARN", "warn", "INFO", 1);
 defineConsoleHandler("ERROR", "error", "WARN", 1);
-defineRelativeHandler(
-  "FATAL",
-  "error",
-  1,
-  console.error.bind(console, theme("[FATAL]", "FATAL"))
-);
+defineRelativeHandler("FATAL", "error", 1, console.error.bind(console));
 
 if (!handlers["LOG"]) {
   throw new Error("No handler named 'LOG' found");
@@ -220,8 +215,6 @@ const createPrefix = (level: string, namespace: string) => {
 // TODO!: consider having everything configurable be overidable by namespaceConfig.
 
 const createLogger = (namespace: string, config?: LoggerConfig) => {
-  console.log("Creating logger", namespace);
-
   const {
     level: configLevel,
     minLevel: configMinLevel,
