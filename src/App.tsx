@@ -1,3 +1,7 @@
+import { RootLogger } from "./utils/logging";
+
+const logger = RootLogger.getLogger("App");
+
 import React from "react";
 
 import { Clients } from "./components/Clients/react";
@@ -28,12 +32,21 @@ const invoiceView = {
 };
 
 export default function App() {
+  logger["debug"]("Rendering...");
+
   const [view, setView] = React.useState(invoiceView);
 
-  const handleClick_Clients = React.useCallback(() => setView(clientsView), []);
-  const handleClick_Jobs = React.useCallback(() => setView(jobsView), []);
+  const handleClick_Clients = React.useCallback(() => {
+    logger.log("Showing Clients view");
+    setView(clientsView);
+  }, []);
+  const handleClick_Jobs = React.useCallback(() => {
+    logger.log("Showing Jobs view");
+    setView(jobsView);
+  }, []);
   const handleClick_Invoice = React.useCallback(() => setView(invoiceView), []);
 
+  logger["debug"]("Rendered.");
   return (
     <div className="min-w-[1000px] min-h-screen p-4 flex flex-col justify-start items-center gap-4 bg-slate-500 text-center text-slate-700 select-none">
       <div className="w-5/6 p-4 flex flex-row justify-evenly gap-4 rounded bg-slate-400 shadow shadow-slate-600">
