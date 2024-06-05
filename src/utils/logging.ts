@@ -297,7 +297,10 @@ const createLogger = (namespace: string, config?: LoggerConfig) => {
       const local_handlerConfig = getHandlerConfig(_level);
       handlerConfig = {
         ...local_handlerConfig,
-        handler: local_handlerConfig.handler.bind(logger, namespace),
+        handler: local_handlerConfig.handler.bind(
+          console,
+          createPrefix(_level, _namespace)
+        ),
       };
     },
 
