@@ -7,9 +7,7 @@ import { ClientsHandler } from "./clientsHandler";
 
 import type { Client } from "./store";
 
-// TODO: rename to useHandler; whatever exports from clients/hooks.ts knows its for clients
-
-export function useClientsHandler() {
+export function useHandler() {
   React.useSyncExternalStore(store.subscribe, store.getSnapshot);
   return new ClientsHandler();
 }

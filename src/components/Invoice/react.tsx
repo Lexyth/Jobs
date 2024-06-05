@@ -5,7 +5,7 @@ import { Button } from "../../utils/components/Button/react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { Modal } from "../../utils/components/Modal/react";
 
-import { useClientsHandler } from "../Clients/hooks";
+import { useHandler as useClientsHandler } from "../Clients/hooks";
 import { useJobsHandler } from "../Jobs/hooks";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useSelection } from "../../utils/components/List/hooks";

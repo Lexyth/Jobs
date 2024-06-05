@@ -3,7 +3,7 @@ import React from "react";
 import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { List } from "../../utils/components/List/react";
 
-import { useClientsHandler } from "./hooks";
+import { useHandler as useClientsHandler } from "./hooks";
 import { useEntryMap } from "./hooks";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useFilter, useEditor } from "../../utils/components/List/hooks";
