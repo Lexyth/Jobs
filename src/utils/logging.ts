@@ -342,8 +342,7 @@ const createLogger = (namespace: string, config?: LoggerConfig) => {
         if (!handler || !handlerConfig) {
           return console.error.bind(
             console,
-            createPrefix(upperCaseProp, _namespace) +
-              "[Invalid logging level]"
+            createPrefix(upperCaseProp, _namespace) + "[Invalid logging level]"
           );
         }
         if (
