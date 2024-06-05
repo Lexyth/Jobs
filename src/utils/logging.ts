@@ -344,11 +344,22 @@ const createLogger = (namespace: string, config?: LoggerConfig) => {
           return target[prop as keyof Logger];
         }
         const upperCaseProp = prop.toUpperCase();
-        const handler = handlers[upperCaseProp];
-        if (handler) {
-          return handler.handler;
+        const handlerConfig = handlers[upperCaseProp];
+        const handler = handlerConfig?.handler;
+        if (!handler || !handlerConfig) {
+          return console.error.bind(
+            console,
+            createPrefix(upperCaseProp, _namespace) +
+              "[Invalid logging level]"
+          );
         }
-        throw Error("Unknown property: " + prop);
+        if (
+          !logger.enabled ||
+          handlerConfig?.levelValue < _minLevelConfig.levelValue
+        ) {
+          return () => {};
+        }
+        return handler.bind(console, createPrefix(upperCaseProp, _namespace));
       }
       throw Error("Unknown property symbol.");
     },
