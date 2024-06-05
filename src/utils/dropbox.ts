@@ -1,7 +1,15 @@
+import { RootLogger } from "./logging";
+
+const logger = RootLogger.getLogger("Dropbox");
+const authLogger = logger.getLogger("Auth");
+authLogger.level = "info";
+
 import * as Dropbox from "dropbox";
 
 let dropbox: Dropbox.Dropbox;
 function authorize() {
+  authLogger.log("Authorizing...");
+
   function parseQueryString(str: string) {
     const ret = Object.create(null);
 
@@ -125,10 +133,10 @@ function authorize() {
     dropbox = new Dropbox.Dropbox({
       auth: dbxAuth,
     });
-    console.log("Successfully Authenticated for Dropbox API");
+    authLogger.log("Authenticated...");
   }
 
-  console.log("Authenticating for Dropbox API");
+  authLogger.log("Authenticating...");
 
   const REDIRECT_URI = window.location.href.split("?")[0];
   if (REDIRECT_URI === undefined) throw new Error("REDIRECT_URI is undefined");
@@ -137,6 +145,8 @@ function authorize() {
   const dbxAuth = new Dropbox.DropboxAuth({
     clientId: CLIENT_ID,
   });
+
+  // TODO: restructure the refreshToken process to set a token variable and just check for that in accessPromise
 
   const rToken = getRefreshToken();
 
@@ -150,6 +160,8 @@ function authorize() {
   const codeVerifier = getCodeVerifier();
 
   if (!codeVerifier) {
+    authLogger.log("Redirecting for authorization...");
+
     doAuth(dbxAuth, REDIRECT_URI);
     return;
   }
@@ -180,7 +192,7 @@ function download(
     function (
       response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>
     ): File {
-      console.log("Downloaded from Dropbox:", response);
+      authLogger.log("Downloaded:", response);
       const fileMetadata = response.result as Dropbox.files.FileMetadata & {
         fileBlob: Blob;
       };
@@ -192,7 +204,7 @@ function download(
     function (
       error: Dropbox.DropboxResponseError<Dropbox.files.DownloadError>
     ): undefined {
-      console.warn(error);
+      authLogger["WARN"](error);
       return undefined;
     }
   );
@@ -210,11 +222,11 @@ function upload(
 
   return statusPromise.then(
     function (response: Dropbox.DropboxResponse<Dropbox.files.FileMetadata>) {
-      console.log("Uploaded to Dropbox:", response);
+      authLogger.log("Uploaded:", response);
       return true;
     },
     function (error: Dropbox.DropboxResponseError<Dropbox.files.UploadError>) {
-      console.warn(error);
+      authLogger["WARN"](error);
       return false;
     }
   );
