@@ -4,7 +4,7 @@ import { LoadingSpinner } from "../../utils/components/LoadingSpinner/react";
 import { List } from "../../utils/components/List/react";
 
 import { useHandler as useClientsHandler } from "../Clients/hooks";
-import { useEntryMap, useJobsHandler } from "./hooks";
+import { useEntryMap, useHandler as useJobsHandler } from "./hooks";
 import { useEntry } from "../../utils/components/Entry/hook";
 import { useEditor, useFilter } from "../../utils/components/List/hooks";
 

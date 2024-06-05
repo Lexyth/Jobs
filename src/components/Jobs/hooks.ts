@@ -9,7 +9,7 @@ import { ClientsHandler } from "../Clients/clientsHandler.js";
 import { Status } from "./store.js";
 import type { Job } from "./store.js";
 
-export function useJobsHandler() {
+export function useHandler() {
   // tell react to reload when the data in the store changes
   React.useSyncExternalStore(store.subscribe, store.getSnapshot);
 
