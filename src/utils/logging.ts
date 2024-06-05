@@ -255,6 +255,7 @@ const createLogger = (namespace: string, config?: LoggerConfig) => {
       return handlerConfig.handler;
     },
 
+    // TODO!: this one should not handle wrong names gracefully, but rather fail hard, since we're acting "as" something, so that something has to exist. The proxy version, on the other hand, is already vague with its index signature, so it would make more sense for that one to use a fall back.
     as(level: string) {
       const local_handlerConfig = getHandlerConfig(level.toUpperCase());
       if (
@@ -263,7 +264,10 @@ const createLogger = (namespace: string, config?: LoggerConfig) => {
       ) {
         return () => {};
       }
-      return local_handlerConfig.handler;
+      return local_handlerConfig.handler.bind(
+        console,
+        createPrefix(level.toUpperCase(), _namespace)
+      );
     },
 
     loggers: {},
