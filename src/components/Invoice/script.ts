@@ -8,28 +8,28 @@ export function createInvoice(invoiceOrigin: InvoiceOrigin): Invoice {
     "UST-ID-Nr.": "TODO", // gotten from User
     "Steuer-Nr.": "TODO", // gotten from User
 
-    r_name: invoiceOrigin.client.name,
-    r_company: invoiceOrigin.client.company ?? "",
-    r_address: invoiceOrigin.client.address ?? "",
-    r_zip: invoiceOrigin.client.zip ?? "",
-    r_city: invoiceOrigin.client.city ?? "",
-    r_country: invoiceOrigin.client.country ?? "",
+    r_name: client.name,
+    r_company: client.company ?? "",
+    r_address: client.address ?? "",
+    r_zip: client.zip ?? "",
+    r_city: client.city ?? "",
+    r_country: client.country ?? "",
 
-    v_name: invoiceOrigin.client.name,
+    v_name: client.name,
 
-    v_company: invoiceOrigin.client.company ?? "",
-    v_address: invoiceOrigin.client.address ?? "",
-    v_zip: invoiceOrigin.client.zip ?? "",
-    v_city: invoiceOrigin.client.city ?? "",
-    v_country: invoiceOrigin.client.country ?? "",
+    v_company: client.company ?? "",
+    v_address: client.address ?? "",
+    v_zip: client.zip ?? "",
+    v_city: client.city ?? "",
+    v_country: client.country ?? "",
 
-    "UST-ID-Nr. Kunde": invoiceOrigin.client["UST-ID-Nr."] ?? "",
-    "Bestell-Nr.": invoiceOrigin.client["Bestell-Nr."] ?? "",
-    Zahlungsbedingungen: invoiceOrigin.client.Zahlungsbedingungen ?? "",
-    "Liefer-Nr. Kunde": invoiceOrigin.client["Liefer-Nr."] ?? "",
-    "Kunden-Nr.": invoiceOrigin.client["Nr."] ?? "",
+    "UST-ID-Nr. Kunde": client["UST-ID-Nr."] ?? "",
+    "Bestell-Nr.": client["Bestell-Nr."] ?? "",
+    Zahlungsbedingungen: client.Zahlungsbedingungen ?? "",
+    "Liefer-Nr. Kunde": client["Liefer-Nr."] ?? "",
+    "Kunden-Nr.": client["Nr."] ?? "",
 
-    jobDataList: invoiceOrigin.jobList.map((job) => {
+    jobDataList: jobList.map((job) => {
       return {
         Ausgeführt: job.dateOfCompletion ?? "",
         "Artikel-Nr.": "TODO",
