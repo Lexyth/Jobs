@@ -1,6 +1,5 @@
 import type { Client } from "./store.js";
 import type { SummaryDataWithAttrs } from "../../utils/components/List/react.js";
-import type { EntryValueMap } from "../../utils/components/Editor/react.js";
 
 export function toSummaryData(
   client: Client,
@@ -15,10 +14,4 @@ export function toSummaryData(
   }
 
   return summary;
-}
-
-export function toEntryDataMap(client: Client): EntryValueMap {
-  return {
-    name: client.name,
-  };
 }
