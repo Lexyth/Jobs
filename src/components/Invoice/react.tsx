@@ -247,7 +247,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
     [disabled, handleSelectJob]
   );
 
-  const handleClick_Button = React.useCallback(() => {
+  const handleCreateInvoice = React.useCallback(() => {
     const selectedClientName_Fancy = `${selectedClient?.name}(#${selectedClient?.id})`;
     const jobsString = JSON.stringify(
       selectedJobs.length === 0 ? filteredJobs : selectedJobs
@@ -263,15 +263,9 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
       );
     }
 
-    if (selectedJobs.length === 0) {
-      throw new Error(
-        "No jobs selected. Button should not have been pressable."
-      );
-    }
-
     const Invoice: Invoice = createInvoice({
       client: selectedClient,
-      jobList: selectedJobs,
+      jobList: selectedJobs.length === 0 ? filteredJobs : selectedJobs,
     });
 
     console.debug(`Invoice: ${JSON.stringify(Invoice)}`);
@@ -312,7 +306,7 @@ function InvoiceCreator({ className }: InvoiceProps): JSX.Element {
         title={`Create Invoice for ${
           selectedJobs.length === 0 ? " all " : `(${selectedJobs.length}) `
         } Jobs`}
-        onClick={handleClick_Button}
+        onClick={handleCreateInvoice}
         attrs={buttonAttrs}
       />
     </div>
