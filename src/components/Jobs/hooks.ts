@@ -82,5 +82,11 @@ export function useEntryMap(job: Job, clientsHandler: ClientsHandler) {
         current: value === job.status,
       }))
     ),
+    dateOfCompletion: useEntry(
+      "Date of Completion",
+      "input",
+      [{ current: true, value: job.dateOfCompletion || "" }],
+      { type: "date" }
+    ),
   };
 }
