@@ -1,10 +1,15 @@
 import type { InvoiceOrigin, Invoice } from "./react";
 
 export function createInvoice(invoiceOrigin: InvoiceOrigin): Invoice {
+  const { jobList, client } = invoiceOrigin;
+
+  const netSum = jobList.reduce((acc, job) => acc + job.net, 0);
+  const grossSum = jobList.reduce((acc, job) => acc + job.gross, 0);
+
   const invoice: Invoice = {
-    Datum: "TODO",
+    Datum: Date.now().toString(),
     "Rechnungs-Nr.": "TODO",
-    "Abrechnung vom": "TODO", // TODO?: is this necessary?
+    "Abrechnung vom": new Date().getMonth().toString(), // TODO?: is this necessary?
     "UST-ID-Nr.": "TODO", // gotten from User
     "Steuer-Nr.": "TODO", // gotten from User
 
@@ -43,9 +48,9 @@ export function createInvoice(invoiceOrigin: InvoiceOrigin): Invoice {
       };
     }),
 
-    "Netto Summe": "TODO",
-    "MwSt. Summe": "TODO",
-    "Brutto Summe": "TODO",
+    "Netto Summe": netSum.toString(),
+    "MwSt. Summe": (grossSum - netSum).toString(),
+    "Brutto Summe": grossSum.toString(),
   };
   return invoice;
 }
